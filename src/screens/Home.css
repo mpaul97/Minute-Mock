@@ -1,20 +1,3 @@
-:root {
-  --dark-blue: #073b4c;
-  --light-blue: #118ab2;
-  --whiteish: #d7fdf0;
-  --pale-green: #b2ffd6;
-  --pink: #aa78a6;
-  --t-shadow: #073b4c13;
-  --b-shadow: #d7fdf03d;
-  --b-shadow-inactive: #073b4c56;
-  --gun-metal: #1e343b;
-  --gun-metal-scroll: #1e343bc0;
-  --pale-green-scroll: #b2ffd691;
-  --pale-green-scroll-light: #b2ffd6d3;
-  --whiteish-scroll: #d7fdf091;
-  --whiteish-scroll-light: #d7fdf0d3;
-}
-
 body {
   background-color: var(--dark-blue);
 }

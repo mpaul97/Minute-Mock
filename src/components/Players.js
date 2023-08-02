@@ -1,9 +1,5 @@
 import playerImg from '../assets/player_placeholder.png';
 import tempPlayers from '../assets/placeholder.json';
-import playersStd from '../assets/tempData_std.json';
-import playersPpr from '../assets/tempData_ppr.json';
-import playersHalf from '../assets/tempData_half.json';
-import playersKings from '../assets/tempData_kings.json';
 import { FaSearch } from 'react-icons/fa';
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { useEffect, useState, useRef } from "react";
@@ -130,7 +126,7 @@ function Players({ fav, favPlayers, queuePosition, currDrafter, allPlayers, hand
             <td>{i.name}</td>
             <td>{i.team}</td>
             <td className="position">{i.position}</td>
-            <td>{i.projections}</td>
+            <td>{Math.round((i.projections + Number.EPSILON) * 100) / 100}</td>
             <td>{i.lastSeasonPoints}</td>
         </tr>
     );
