@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Link } from "react-router-dom";
-import { render } from "@testing-library/react";
 import { useState } from 'react';
 import './Home.css';
 import HomeButton from '../components/HomeButton';
@@ -8,46 +7,18 @@ import QueueButton from '../components/QueueButton';
 import cx from 'classnames';
 import PlayerInput from '../components/PlayerInput';
 import { AiFillInfoCircle } from "react-icons/ai";
+import Modal from 'react-modal';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
-// const players = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DST'];
 const players = [
-    {
-        name: 'QB',
-        size: 2,
-        default: 1
-    },
-    {
-        name: 'RB',
-        size: 4,
-        default: 2
-    },
-    {
-        name: 'WR',
-        size: 4,
-        default: 2
-    },
-    {
-        name: 'TE',
-        size: 2,
-        default: 1
-    },
-    {
-        name: 'FLEX',
-        size: 4,
-        default: 1
-    },
-    {
-        name: 'K',
-        size: 2,
-        default: 1
-    },
-    {
-        name: 'DST',
-        size: 2,
-        default: 1
-    }
+    { name: 'QB', size: 2, default: 1 },
+    { name: 'RB', size: 4, default: 2 },
+    { name: 'WR', size: 4, default: 2 },
+    { name: 'TE', size: 2, default: 1 },
+    { name: 'FLEX', size: 4, default: 1 },
+    { name: 'K', size: 2, default: 1 },
+    { name: 'DST', size: 2, default: 1 }
 ];
 const times = ['Instant', 'Fast', 'Medium', 'Slow'];
 
@@ -99,6 +70,8 @@ function Home() {
     const [flexSize, setFlexSize] = useState(players.filter(x => x.name === 'FLEX')[0].default);
     const [kSize, setKSize] = useState(players.filter(x => x.name === 'K')[0].default);
     const [dstSize, setDstSize] = useState(players.filter(x => x.name === 'DST')[0].default);
+
+    const funcs = [{'QB': setQbSize}]
 
     const handleChange = (e) => {
         if (e.target.name === 'QB') {
