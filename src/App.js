@@ -1,10 +1,19 @@
 import Home from "./screens/Home";
 import Mock from "./screens/Mock";
 import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
+import { createTheme, ThemeProvider, Container, CssBaseline } from "@mui/material";
+import { orange, purple } from "@mui/material/colors";
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark'
+  }
+})
 
 function App() {
   return (
-    <div className='container'>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <BrowserRouter>
         <Routes>
           <Route exact path="/home" element={<Home />} />
@@ -12,7 +21,7 @@ function App() {
         </Routes>
       </BrowserRouter>
       {/* <Mock /> */}
-    </div>
+    </ThemeProvider>
   )
 }
 

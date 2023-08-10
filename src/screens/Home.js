@@ -8,6 +8,7 @@ import cx from 'classnames';
 import PlayerInput from '../components/PlayerInput';
 import { AiFillInfoCircle } from "react-icons/ai";
 import Modal from 'react-modal';
+import { Box, Container, Typography, Paper, Button } from '@mui/material';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
@@ -120,85 +121,113 @@ function Home() {
     const [toggled, setToggled] = useState(false);
     
     return (
-        <div className='home-container'>
-            <div className="info-button" onClick={() => setToggled(!toggled)}>
-                <AiFillInfoCircle className="toggle-info" size={25} />
-            </div>
-            <h2 className='heading'>Minute Mock</h2>
-            <p 
-                className="info" 
-                style={{
-                    display: !toggled ? 'none' : 'block'
-                }}>
-                Minute Mock is an NFL fantasy football mock draft simulator which can be
-                very quickly without having to rely on other users and is fully customizable.
-                To begin just select select your specifications below  and then click submit. Computer Clock selection 
-                determines how fast the comptuer will make its selections. 
-                <br></br><b>Instant:</b> 0s, <b>Fast:</b> 2s, <b>Medium:</b> 5s, <b>Slow:</b> 10s<br></br>
-                <b>User Time Always:</b> 30s<br></br>
-                Once in the draft page, you can then add players to your favorites which will be 
-                autoselected if your time expires and your team has room for that position. Finally, 
-                click start in the upper right to begin the draft.
-            </p>
-            <div className='divider'></div>
-            <div>
-                <div className="section-container" style={{marginTop: -10, textAlign: "center"}}>
-                    <h3 className="subheading size">League Size:</h3>
-                    <ul className="size list">
-                        {renderSizes}
-                    </ul>
-                    {/*hidden input to pass to form*/}
-                    <input className="hidden-input" type="text" name='size' defaultValue={size}></input>
-                </div>
-                <div className="section-container">
-                    <h3 className="subheading queue">Draft Position:</h3>
-                    <ul className="queue list">
-                        <div className="queue-container">
-                            {renderQueue}
-                        </div>
-                    </ul>
-                    <input className="hidden-input" type="text" name='queue' defaultValue={queue}></input>
-                </div>
-                <div className='section-container'>
-                    <h3 className="subheading type">League Type:</h3>
-                    <ul className='type list'>
-                        {renderType}
-                    </ul>
-                    <input className="hidden-input" type="text" name='type' defaultValue={type}></input>
-                </div>
-                <div className='section-container players'>
-                    <h3 className="subheading players">Players:</h3>
-                    <ul className='players list'>
-                        {renderPlayers}
-                    </ul>
-                </div>
-                <div className='section-container clock'>
-                    <h3 className="subheading clock">Computer Clock:</h3>
-                    <ul className='clock list'>
-                        {renderClocks}
-                    </ul>
-                </div>
-                <div className='divider'></div>
-                <div className='section-container submit'>
-                    <Link 
-                        to="/content"
-                        state={{
-                            leagueSize: size,
-                            queuePosition: queue,
-                            leagueType: type,
-                            playersSize: [qbSize, rbSize, wrSize, teSize, flexSize, kSize, dstSize, 7],
-                            clock: clock
-                        }}
-                    >
-                        <input 
-                            className="home-button submit" 
-                            type='submit' 
-                            value='Submit'>
-                        </input>
-                    </Link>
-                </div>
-            </div>
-        </div>
+        <Container 
+            maxWidth="100vw" 
+            style={{
+                padding: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingTop: '5%'
+            }}
+        >
+            <Paper 
+                elevation={10}
+                sx={{
+                    width: '80%', 
+                    height: 'fit-content',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: 1,
+                    gap: 2,
+                    padding: '5%'
+                }}
+            >
+                <Typography variant='h4' fontWeight={700} color="primary">Minute Mock</Typography>
+                <AiFillInfoCircle size={25} />
+            </Paper>
+        </Container>
+        // <div className='home-container'>
+        //     <div className="info-button" onClick={() => setToggled(!toggled)}>
+        //         <AiFillInfoCircle className="toggle-info" size={25} />
+        //     </div>
+        //     <h2 className='heading'>Minute Mock</h2>
+        //     <p 
+        //         className="info" 
+        //         style={{
+        //             display: !toggled ? 'none' : 'block'
+        //         }}>
+        //         Minute Mock is an NFL fantasy football mock draft simulator which can be
+        //         very quickly without having to rely on other users and is fully customizable.
+        //         To begin just select select your specifications below  and then click submit. Computer Clock selection 
+        //         determines how fast the comptuer will make its selections. 
+        //         <br></br><b>Instant:</b> 0s, <b>Fast:</b> 2s, <b>Medium:</b> 5s, <b>Slow:</b> 10s<br></br>
+        //         <b>User Time Always:</b> 30s<br></br>
+        //         Once in the draft page, you can then add players to your favorites which will be 
+        //         autoselected if your time expires and your team has room for that position. Finally, 
+        //         click start in the upper right to begin the draft.
+        //     </p>
+        //     <div className='divider'></div>
+        //     <div>
+        //         <div className="section-container" style={{marginTop: -10, textAlign: "center"}}>
+        //             <h3 className="subheading size">League Size:</h3>
+        //             <ul className="size list">
+        //                 {renderSizes}
+        //             </ul>
+        //             {/*hidden input to pass to form*/}
+        //             <input className="hidden-input" type="text" name='size' defaultValue={size}></input>
+        //         </div>
+        //         <div className="section-container">
+        //             <h3 className="subheading queue">Draft Position:</h3>
+        //             <ul className="queue list">
+        //                 <div className="queue-container">
+        //                     {renderQueue}
+        //                 </div>
+        //             </ul>
+        //             <input className="hidden-input" type="text" name='queue' defaultValue={queue}></input>
+        //         </div>
+        //         <div className='section-container'>
+        //             <h3 className="subheading type">League Type:</h3>
+        //             <ul className='type list'>
+        //                 {renderType}
+        //             </ul>
+        //             <input className="hidden-input" type="text" name='type' defaultValue={type}></input>
+        //         </div>
+        //         <div className='section-container players'>
+        //             <h3 className="subheading players">Players:</h3>
+        //             <ul className='players list'>
+        //                 {renderPlayers}
+        //             </ul>
+        //         </div>
+        //         <div className='section-container clock'>
+        //             <h3 className="subheading clock">Computer Clock:</h3>
+        //             <ul className='clock list'>
+        //                 {renderClocks}
+        //             </ul>
+        //         </div>
+        //         <div className='divider'></div>
+        //         <div className='section-container submit'>
+        //             <Link 
+        //                 to="/content"
+        //                 state={{
+        //                     leagueSize: size,
+        //                     queuePosition: queue,
+        //                     leagueType: type,
+        //                     playersSize: [qbSize, rbSize, wrSize, teSize, flexSize, kSize, dstSize, 7],
+        //                     clock: clock
+        //                 }}
+        //             >
+        //                 <input 
+        //                     className="home-button submit" 
+        //                     type='submit' 
+        //                     value='Submit'>
+        //                 </input>
+        //             </Link>
+        //         </div>
+        //     </div>
+        // </div>
     )
 }
 
