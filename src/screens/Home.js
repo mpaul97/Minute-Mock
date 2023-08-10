@@ -6,9 +6,9 @@ import HomeButton from '../components/HomeButton';
 import QueueButton from '../components/QueueButton';
 import cx from 'classnames';
 import PlayerInput from '../components/PlayerInput';
-import { AiFillInfoCircle } from "react-icons/ai";
+import { AiFillInfoCircle, AiOutlineClose } from "react-icons/ai";
 import Modal from 'react-modal';
-import { Box, Container, Typography, Paper, Button } from '@mui/material';
+import { Box, Container, Typography, Paper, Button, IconButton } from '@mui/material';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
@@ -24,45 +24,11 @@ const players = [
 const times = ['Instant', 'Fast', 'Medium', 'Slow'];
 
 function Home() {
+    const [infoModalIsOpen, setInfoModalIsOpen] = useState(false);
 
     const [size, setSize] = useState(8);
-    const renderSizes = sizes.map((i) =>
-        <li key={i} className="list-element">
-            <HomeButton
-                value={i} 
-                onClick={() => setSize(i)} 
-                id={size===i ? 'active' : ''}
-                className="home-button"
-                />
-        </li>
-    );
-
     const [queue, setQueue] = useState(1);
-    const renderQueue = Array.from({length: size}, (_, i) => i + 1).map((i) =>
-        <li key={i} className="list-element">
-            <QueueButton
-                value={i} 
-                onClick={() => setQueue(i)} 
-                id={queue===i ? 'active' : ''}
-                className={cx('queue-button', {
-                    'left' : i === 1,
-                    'right': i === size
-                })}
-                />
-        </li>
-    );
-
     const [type, setType] = useState('Standard');
-    const renderType = types.map((i) =>
-        <li key={i} className="list-element">
-            <HomeButton 
-                value={i} 
-                onClick={() => setType(i)} 
-                id={type===i ? 'active' : ''}
-                className="home-button type"
-                />
-        </li>
-    );
 
     const [qbSize, setQbSize] = useState(players.filter(x => x.name === 'QB')[0].default);
     const [rbSize, setRbSize] = useState(players.filter(x => x.name === 'RB')[0].default);
@@ -71,8 +37,6 @@ function Home() {
     const [flexSize, setFlexSize] = useState(players.filter(x => x.name === 'FLEX')[0].default);
     const [kSize, setKSize] = useState(players.filter(x => x.name === 'K')[0].default);
     const [dstSize, setDstSize] = useState(players.filter(x => x.name === 'DST')[0].default);
-
-    const funcs = [{'QB': setQbSize}]
 
     const handleChange = (e) => {
         if (e.target.name === 'QB') {
@@ -119,34 +83,101 @@ function Home() {
 
     // toggle info
     const [toggled, setToggled] = useState(false);
-    
-    return (
-        <Container 
-            maxWidth="100vw" 
-            style={{
-                padding: 0,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingTop: '5%'
-            }}
-        >
-            <Paper 
-                elevation={10}
-                sx={{
-                    width: '80%', 
-                    height: 'fit-content',
+
+    // setSize and update queue position if greater than size
+    const setSizeAndQueue = (size) => {
+        setSize(size);
+        if (queue > size) {
+            setQueue(size);
+        };
+    };
+
+    const renderOption = (title, arr, state_var, setFunc) => {
+        return (
+            <Container
+                style={{
+                    width: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    alignItems: 'center',
-                    borderRadius: 1,
-                    gap: 2,
-                    padding: '5%'
+                    alignItems: 'center'
                 }}
             >
+                <Typography variant='h6' fontWeight={600} color="primary">{title}</Typography>
+                <Container
+                    style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        gap: 5,
+                        padding: 10
+                    }}
+                >
+                    {arr.map((x) => {
+                        return (
+                            <Button 
+                                variant={x !== state_var ? 'outlined' : 'contained'}
+                                onClick={() => setFunc(x)}
+                                key={title + " " + x}
+                            >
+                                {x}
+                            </Button>
+                        )
+                    })}
+                </Container>
+            </Container>
+        )
+    };
+     
+    return (
+        <Container 
+            maxWidth="100vw" 
+            style={styles.mainContainer}
+        >
+            <Paper 
+                elevation={10}
+                sx={styles.paperOptions}
+            >
                 <Typography variant='h4' fontWeight={700} color="primary">Minute Mock</Typography>
-                <AiFillInfoCircle size={25} />
+                <IconButton color='primary' onClick={() => setInfoModalIsOpen(true)}>
+                    <AiFillInfoCircle size={20}/>
+                </IconButton>
+                <Modal
+                    isOpen={infoModalIsOpen}
+                    onRequestClose={() => setInfoModalIsOpen(false)}
+                    style={styles.modalStyle}
+                    appElement={document.body}
+                >
+                    <Paper
+                        style={{
+                            width: '100%',
+                            padding: 20,
+                            paddingBottom: 40,
+                            textAlign: 'center'
+                        }}
+                    >
+                        <IconButton style={{float: 'right', top: 0}} onClick={() => setInfoModalIsOpen(false)}>
+                            <AiOutlineClose size={16}/>
+                        </IconButton>
+                        <br></br>
+                        <br></br>
+                        <Typography variant='p' color="primary">
+                            Minute Mock is an NFL fantasy football mock draft simulator which can be
+                            very quickly without having to rely on other users and is fully customizable.
+                            To begin just select select your specifications below  and then click submit. Computer Clock selection 
+                            determines how fast the comptuer will make its selections. 
+                            <br></br><b>Instant:</b> 0s, <b>Fast:</b> 2s, <b>Medium:</b> 5s, <b>Slow:</b> 10s<br></br>
+                            <b>User Time Always:</b> 30s<br></br>
+                            Once in the draft page, you can then add players to your favorites which will be 
+                            autoselected if your time expires and your team has room for that position. Finally, 
+                            click start in the upper right to begin the draft.
+                        </Typography>
+                    </Paper>
+                </Modal>
+                {renderOption('League Size', sizes, size, setSizeAndQueue)}
+                {renderOption('Queue Position', Array.from({length: size}, (_, i) => i + 1), queue, setQueue)}
+                {renderOption('League Type', types, type, setType)}
             </Paper>
         </Container>
         // <div className='home-container'>
@@ -230,5 +261,41 @@ function Home() {
         // </div>
     )
 }
+
+const styles = {
+    mainContainer: {
+        padding: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: '5%'
+    },
+    paperOptions: {
+        width: '80%', 
+        height: 'fit-content',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 1,
+        padding: '5%'
+    },
+    modalStyle: {
+        content: {
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: 'fit-content',
+            boxShadow: 24,
+            padding: 0,
+            margin: 0,
+        },
+        overlay: {
+            background: 'rgba(255, 255, 255, 0.7)'
+        }
+    }
+};
 
 export default Home;
