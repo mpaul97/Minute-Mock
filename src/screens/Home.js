@@ -27,7 +27,7 @@ const times = ['Instant', 'Fast', 'Medium', 'Slow'];
 function Home() {
     const [newQbSize, setNewQbSize] = useState(1);
     const newPlayers = {
-        'QB': {size: 2, default: 1, variable: newQbSize, setFunc: setNewQbSize}
+        'QB': {size: 2, variable: newQbSize, setFunc: setNewQbSize}
     }
 
     const [infoModalIsOpen, setInfoModalIsOpen] = useState(false);
@@ -44,22 +44,22 @@ function Home() {
     const [kSize, setKSize] = useState(players.filter(x => x.name === 'K')[0].default);
     const [dstSize, setDstSize] = useState(players.filter(x => x.name === 'DST')[0].default);
 
-    const handleChange = (e) => {
-        if (e.target.name === 'QB') {
-            setQbSize(parseInt(e.target.value));
-        } else if (e.target.name === 'RB') {
-            setRbSize(parseInt(e.target.value));
-        } else if (e.target.name === 'WR') {
-            setWrSize(parseInt(e.target.value));
-        } else if (e.target.name === 'TE') {
-            setTeSize(parseInt(e.target.value));
-        } else if (e.target.name === 'FLEX') {
-            setFlexSize(parseInt(e.target.value));
-        } else if (e.target.name === 'K') {
-            setKSize(parseInt(e.target.value));
-        } else if (e.target.name === 'DST') {
-            setDstSize(parseInt(e.target.value));
-        }
+    const handleChange = (event) => {
+        // if (e.target.name === 'QB') {
+        //     setQbSize(parseInt(e.target.value));
+        // } else if (e.target.name === 'RB') {
+        //     setRbSize(parseInt(e.target.value));
+        // } else if (e.target.name === 'WR') {
+        //     setWrSize(parseInt(e.target.value));
+        // } else if (e.target.name === 'TE') {
+        //     setTeSize(parseInt(e.target.value));
+        // } else if (e.target.name === 'FLEX') {
+        //     setFlexSize(parseInt(e.target.value));
+        // } else if (e.target.name === 'K') {
+        //     setKSize(parseInt(e.target.value));
+        // } else if (e.target.name === 'DST') {
+        //     setDstSize(parseInt(e.target.value));
+        // }
     };
 
     const renderPlayers = players.map((i) =>
@@ -181,9 +181,10 @@ function Home() {
                                 >
                                     <InputLabel key={x}>{x}</InputLabel>
                                     <Select
-                                        value={1}
+                                        value={newPlayers[x].variable}
                                         label={x}
-                                        key={x + newPlayers[x].size}
+                                        key={x + '_' + newPlayers[x].size}
+                                        onChange={(e) => newPlayers[x].setFunc(parseInt(e.target.value))}
                                     >
                                         {Array.from({length: newPlayers[x].size}, (_, i) => i + 1).map((s) => {
                                             return (
