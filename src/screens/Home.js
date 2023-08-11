@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import { useState } from 'react';
 import './Home.css';
@@ -8,7 +8,8 @@ import cx from 'classnames';
 import PlayerInput from '../components/PlayerInput';
 import { AiFillInfoCircle, AiOutlineClose } from "react-icons/ai";
 import Modal from 'react-modal';
-import { Box, Container, Typography, Paper, Button, IconButton } from '@mui/material';
+import { Container, Typography, Paper, Button, IconButton, InputLabel, MenuItem, FormControl } from '@mui/material';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
@@ -24,6 +25,11 @@ const players = [
 const times = ['Instant', 'Fast', 'Medium', 'Slow'];
 
 function Home() {
+    const [newQbSize, setNewQbSize] = useState(1);
+    const newPlayers = {
+        'QB': {size: 2, default: 1, variable: newQbSize, setFunc: setNewQbSize}
+    }
+
     const [infoModalIsOpen, setInfoModalIsOpen] = useState(false);
 
     const [size, setSize] = useState(8);
@@ -92,27 +98,15 @@ function Home() {
         };
     };
 
+    // render all options except players
     const renderOption = (title, arr, state_var, setFunc) => {
         return (
             <Container
-                style={{
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}
+                style={styles.optionsContainer}
             >
                 <Typography variant='h6' fontWeight={600} color="primary">{title}</Typography>
                 <Container
-                    style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        gap: 5,
-                        padding: 10
-                    }}
+                    style={styles.innerOptionsContainer}
                 >
                     {arr.map((x) => {
                         return (
@@ -150,12 +144,7 @@ function Home() {
                     appElement={document.body}
                 >
                     <Paper
-                        style={{
-                            width: '100%',
-                            padding: 20,
-                            paddingBottom: 40,
-                            textAlign: 'center'
-                        }}
+                        style={styles.modalPaper}
                     >
                         <IconButton style={{float: 'right', top: 0}} onClick={() => setInfoModalIsOpen(false)}>
                             <AiOutlineClose size={16}/>
@@ -176,56 +165,40 @@ function Home() {
                     </Paper>
                 </Modal>
                 {renderOption('League Size', sizes, size, setSizeAndQueue)}
-                {renderOption('Queue Position', Array.from({length: size}, (_, i) => i + 1), queue, setQueue)}
+                {renderOption('Draft Position', Array.from({length: size}, (_, i) => i + 1), queue, setQueue)}
                 {renderOption('League Type', types, type, setType)}
+                {/* Render player (select sizes for each position) */}
+                <Container
+                    style={styles.optionsContainer}
+                >
+                    <Typography variant='h6' fontWeight={600} color="primary">Players</Typography>
+                    <Container style={styles.innerOptionsContainer}>
+                        {Object.keys(newPlayers).map((x) => {
+                            return (
+                                <FormControl
+                                    sx={{m: 1}}
+                                    key={x}
+                                >
+                                    <InputLabel key={x}>{x}</InputLabel>
+                                    <Select
+                                        value={1}
+                                        label={x}
+                                        key={x + newPlayers[x].size}
+                                    >
+                                        {Array.from({length: newPlayers[x].size}, (_, i) => i + 1).map((s) => {
+                                            return (
+                                                <MenuItem key={x + '_' + s} value={s}>{s}</MenuItem>
+                                            )
+                                        })
+                                        }
+                                    </Select>
+                                </FormControl>
+                            )
+                        })}
+                    </Container>
+                </Container>
             </Paper>
         </Container>
-        // <div className='home-container'>
-        //     <div className="info-button" onClick={() => setToggled(!toggled)}>
-        //         <AiFillInfoCircle className="toggle-info" size={25} />
-        //     </div>
-        //     <h2 className='heading'>Minute Mock</h2>
-        //     <p 
-        //         className="info" 
-        //         style={{
-        //             display: !toggled ? 'none' : 'block'
-        //         }}>
-        //         Minute Mock is an NFL fantasy football mock draft simulator which can be
-        //         very quickly without having to rely on other users and is fully customizable.
-        //         To begin just select select your specifications below  and then click submit. Computer Clock selection 
-        //         determines how fast the comptuer will make its selections. 
-        //         <br></br><b>Instant:</b> 0s, <b>Fast:</b> 2s, <b>Medium:</b> 5s, <b>Slow:</b> 10s<br></br>
-        //         <b>User Time Always:</b> 30s<br></br>
-        //         Once in the draft page, you can then add players to your favorites which will be 
-        //         autoselected if your time expires and your team has room for that position. Finally, 
-        //         click start in the upper right to begin the draft.
-        //     </p>
-        //     <div className='divider'></div>
-        //     <div>
-        //         <div className="section-container" style={{marginTop: -10, textAlign: "center"}}>
-        //             <h3 className="subheading size">League Size:</h3>
-        //             <ul className="size list">
-        //                 {renderSizes}
-        //             </ul>
-        //             {/*hidden input to pass to form*/}
-        //             <input className="hidden-input" type="text" name='size' defaultValue={size}></input>
-        //         </div>
-        //         <div className="section-container">
-        //             <h3 className="subheading queue">Draft Position:</h3>
-        //             <ul className="queue list">
-        //                 <div className="queue-container">
-        //                     {renderQueue}
-        //                 </div>
-        //             </ul>
-        //             <input className="hidden-input" type="text" name='queue' defaultValue={queue}></input>
-        //         </div>
-        //         <div className='section-container'>
-        //             <h3 className="subheading type">League Type:</h3>
-        //             <ul className='type list'>
-        //                 {renderType}
-        //             </ul>
-        //             <input className="hidden-input" type="text" name='type' defaultValue={type}></input>
-        //         </div>
         //         <div className='section-container players'>
         //             <h3 className="subheading players">Players:</h3>
         //             <ul className='players list'>
@@ -291,10 +264,35 @@ const styles = {
             boxShadow: 24,
             padding: 0,
             margin: 0,
+            border: 0
         },
         overlay: {
-            background: 'rgba(255, 255, 255, 0.7)'
+            background: 'rgba(255, 255, 255, 0.4)'
         }
+    },
+    modalPaper: {
+        width: '100%',
+        padding: 20,
+        paddingBottom: 40,
+        textAlign: 'center'
+    },
+    optionsContainer: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    innerOptionsContainer: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 5,
+        padding: 10
+    },
+    select: {
+        borderColor: 'red'
     }
 };
 
