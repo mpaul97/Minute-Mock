@@ -1,4 +1,4 @@
-import "./Mock.css";
+// import "./Mock.css";
 import PlayerQueue from "../components/PlayerQueue";
 import Team from "../components/Team";
 import Player from "../components/Players";
@@ -9,8 +9,9 @@ import ding from '../assets/news-ting-6832.mp3';
 import { useDebugValue, useEffect, useState, useRef } from "react";
 import Favorites from "../components/Favorites";
 import { Link, useLocation } from "react-router-dom";
-import { AiFillHome } from "react-icons/ai";
-import { Container, Paper, Grid, Typography, Button, IconButton } from "@mui/material";
+import { AiFillHome, AiFillPlayCircle } from "react-icons/ai";
+import { Container, Paper, Grid, Typography, Chip, Button, IconButton } from "@mui/material";
+import { lightBlue } from "@mui/material/colors";
 
 //*************************************************** */
 //****************** Draft Logic ******************** */
@@ -528,15 +529,24 @@ function buildQueueArray(leagueSize, playersSize) {
 }
 
 function Mock() {
+    var leagueSize = 8;
+    var queuePosition = 1;
+    var leagueType = 'Standard';
+    var posSizes = [1, 2, 2, 1, 1, 1, 1];
+    var clock = 'Instant';
+    try {
+        const location = useLocation();
+        const homeInfo = location.state;
+        leagueSize = homeInfo.leagueSize;
+        queuePosition = homeInfo.queuePosition;
+        leagueType = homeInfo.leagueType;
+        posSizes = homeInfo.playersSize;
+        clock = homeInfo.clock;
+    } catch (error) {
+        console.log('Props not found, using default values.');
+    }
 
-    const location = useLocation();
-    const homeInfo = location.state;
-
-    var leagueSize = homeInfo.leagueSize;
-    var queuePosition = homeInfo.queuePosition;
-    var leagueType = homeInfo.leagueType;
-    var posSizes = homeInfo.playersSize;
-    var clock = homeInfo.clock;
+    // OLD below
 
     var playersSize = sum(posSizes);
 
@@ -1072,14 +1082,36 @@ function Mock() {
     return (
         <Container maxWidth='100vw' style={styles.mainContainer}>
             <Paper style={styles.header}>
-                <Typography variant="h3" fontWeight={700} color='primary'>Minute Mock</Typography>
-                <IconButton color='primary'>
-                    <AiFillHome size={24}/>
-                </IconButton>
+                <Typography variant="h3" fontWeight={700} color='primary' style={{width: '100%'}}>Minute Mock</Typography>
+                <Container style={styles.headerOptions}>   
+                    <IconButton color='primary'>
+                        <AiFillHome size={24}/>
+                    </IconButton>
+                    <IconButton color='primary'>
+                        <AiFillPlayCircle size={24}/>
+                    </IconButton>
+                    <Chip color='primary' label="0:00" style={{fontSize: 16}}></Chip>
+                </Container>
             </Paper>
+            <Container style={styles.draftInfoContainer}>
+                <Typography variant="h6" color='primary'>{displayInfo}</Typography>
+            </Container>
+            <Container maxWidth={false} style={styles.queueContainer}>
+                {queueArr.map((x) => {
+                    return (
+                        <Chip 
+                            color='primary' 
+                            label={x.queueVal} 
+                            style={((typeof(x.queueVal) === 'string') && (x.queueVal.includes('Round'))) ? styles.roundQueueObject : styles.queueObject}
+                            key={x.round + '_' + x.queueVal}
+                        >
+                        </Chip>
+                    )
+                })}
+            </Container>
             <Grid container spacing={0}>
-                <Grid item>
-                    <Typography>8</Typography>
+                <Grid item xs={2}>
+                    <Paper></Paper>
                 </Grid>
             </Grid>
         </Container>
@@ -1174,7 +1206,47 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         width: '100%',
-        padding: 10
+        padding: 15
+    },
+    headerOptions: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'end',
+        alignItems: 'center',
+        gap: 5
+    },
+    draftInfoContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 5
+    },
+    queueContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'no-wrap',
+        justifyContent: 'start',
+        alignItems: 'start',
+        width: '100%',
+        overflow: 'hidden',
+        padding: 0
+    },
+    queueObject: {
+        fontSize: 16, 
+        borderRadius: 0,
+        padding: 5,
+        paddingTop: 20,
+        paddingBottom: 20
+    },
+    roundQueueObject: {
+        fontSize: 16, 
+        borderRadius: 0,
+        padding: 5,
+        paddingTop: 20,
+        paddingBottom: 20,
+        borderLeft: '2px solid black',
+        borderRight: '2px solid black',
+        fontWeight: 700
     }
 }
 
