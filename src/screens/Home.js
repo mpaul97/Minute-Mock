@@ -13,82 +13,33 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
-const players = [
-    { name: 'QB', size: 2, default: 1 },
-    { name: 'RB', size: 4, default: 2 },
-    { name: 'WR', size: 4, default: 2 },
-    { name: 'TE', size: 2, default: 1 },
-    { name: 'FLEX', size: 4, default: 1 },
-    { name: 'K', size: 2, default: 1 },
-    { name: 'DST', size: 2, default: 1 }
-];
 const times = ['Instant', 'Fast', 'Medium', 'Slow'];
 
 function Home() {
-    const [newQbSize, setNewQbSize] = useState(1);
-    const newPlayers = {
-        'QB': {size: 2, variable: newQbSize, setFunc: setNewQbSize}
-    }
 
     const [infoModalIsOpen, setInfoModalIsOpen] = useState(false);
 
     const [size, setSize] = useState(8);
     const [queue, setQueue] = useState(1);
     const [type, setType] = useState('Standard');
-
-    const [qbSize, setQbSize] = useState(players.filter(x => x.name === 'QB')[0].default);
-    const [rbSize, setRbSize] = useState(players.filter(x => x.name === 'RB')[0].default);
-    const [wrSize, setWrSize] = useState(players.filter(x => x.name === 'WR')[0].default);
-    const [teSize, setTeSize] = useState(players.filter(x => x.name === 'TE')[0].default);
-    const [flexSize, setFlexSize] = useState(players.filter(x => x.name === 'FLEX')[0].default);
-    const [kSize, setKSize] = useState(players.filter(x => x.name === 'K')[0].default);
-    const [dstSize, setDstSize] = useState(players.filter(x => x.name === 'DST')[0].default);
-
-    const handleChange = (event) => {
-        // if (e.target.name === 'QB') {
-        //     setQbSize(parseInt(e.target.value));
-        // } else if (e.target.name === 'RB') {
-        //     setRbSize(parseInt(e.target.value));
-        // } else if (e.target.name === 'WR') {
-        //     setWrSize(parseInt(e.target.value));
-        // } else if (e.target.name === 'TE') {
-        //     setTeSize(parseInt(e.target.value));
-        // } else if (e.target.name === 'FLEX') {
-        //     setFlexSize(parseInt(e.target.value));
-        // } else if (e.target.name === 'K') {
-        //     setKSize(parseInt(e.target.value));
-        // } else if (e.target.name === 'DST') {
-        //     setDstSize(parseInt(e.target.value));
-        // }
-    };
-
-    const renderPlayers = players.map((i) =>
-        <li key={i.name} className='list-element players'>
-            <PlayerInput
-                name={i.name}
-                size={i.size}
-                initVal={i.default}
-                className="player-input"
-                onChange={handleChange}
-                />
-        </li>
-    );
-
-    // timing
     const [clock, setClock] = useState('Instant');
-    const renderClocks = times.map((i) =>
-        <li key={i} className="list-element">
-            <HomeButton 
-                value={i} 
-                onClick={() => setClock(i)} 
-                id={clock===i ? 'active' : ''}
-                className="home-button clock"
-                />
-        </li>
-    );
 
-    // toggle info
-    const [toggled, setToggled] = useState(false);
+    const [qbSize, setQbSize] = useState(1);
+    const [rbSize, setRbSize] = useState(2);
+    const [wrSize, setWrSize] = useState(2);
+    const [teSize, setTeSize] = useState(1);
+    const [flexSize, setFlexSize] = useState(1);
+    const [kSize, setKSize] = useState(1);
+    const [dstSize, setDstSize] = useState(1);
+    const players = {
+        'QB': {size: 2, variable: qbSize, setFunc: setQbSize},
+        'RB': {size: 4, variable: rbSize, setFunc: setRbSize},
+        'WR': {size: 4, variable: wrSize, setFunc: setWrSize},
+        'TE': {size: 2, variable: teSize, setFunc: setTeSize},
+        'FLEX': {size: 4, variable: flexSize, setFunc: setFlexSize},
+        'K': {size: 2, variable: kSize, setFunc: setKSize},
+        'DST': {size: 2, variable: dstSize, setFunc: setDstSize}
+    }
 
     // setSize and update queue position if greater than size
     const setSizeAndQueue = (size) => {
@@ -173,7 +124,7 @@ function Home() {
                 >
                     <Typography variant='h6' fontWeight={600} color="primary">Players</Typography>
                     <Container style={styles.innerOptionsContainer}>
-                        {Object.keys(newPlayers).map((x) => {
+                        {Object.keys(players).map((x) => {
                             return (
                                 <FormControl
                                     sx={{m: 1}}
@@ -181,12 +132,12 @@ function Home() {
                                 >
                                     <InputLabel key={x}>{x}</InputLabel>
                                     <Select
-                                        value={newPlayers[x].variable}
+                                        value={players[x].variable}
                                         label={x}
-                                        key={x + '_' + newPlayers[x].size}
-                                        onChange={(e) => newPlayers[x].setFunc(parseInt(e.target.value))}
+                                        key={x + '_' + players[x].size}
+                                        onChange={(e) => players[x].setFunc(parseInt(e.target.value))}
                                     >
-                                        {Array.from({length: newPlayers[x].size}, (_, i) => i + 1).map((s) => {
+                                        {Array.from({length: players[x].size}, (_, i) => i + 1).map((s) => {
                                             return (
                                                 <MenuItem key={x + '_' + s} value={s}>{s}</MenuItem>
                                             )
@@ -198,21 +149,30 @@ function Home() {
                         })}
                     </Container>
                 </Container>
+                {renderOption('Clock Speed', times, clock, setClock)}
+                <Link
+                    to='/mock/content'
+                    state={{
+                        leagueSize: size,
+                        queuePosition: queue,
+                        leagueType: type,
+                        playersSize: Object.keys(players).map(key => players[key].variable),
+                        clock: clock
+                    }}
+                >
+                    <Button 
+                        type='submit' 
+                        variant='contained' 
+                        color='secondary'
+                        style={{
+                            marginTop: 20
+                        }}
+                    >
+                        Submit
+                    </Button>
+                </Link>
             </Paper>
         </Container>
-        //         <div className='section-container players'>
-        //             <h3 className="subheading players">Players:</h3>
-        //             <ul className='players list'>
-        //                 {renderPlayers}
-        //             </ul>
-        //         </div>
-        //         <div className='section-container clock'>
-        //             <h3 className="subheading clock">Computer Clock:</h3>
-        //             <ul className='clock list'>
-        //                 {renderClocks}
-        //             </ul>
-        //         </div>
-        //         <div className='divider'></div>
         //         <div className='section-container submit'>
         //             <Link 
         //                 to="/content"

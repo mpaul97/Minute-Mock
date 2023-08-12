@@ -9,6 +9,8 @@ import ding from '../assets/news-ting-6832.mp3';
 import { useDebugValue, useEffect, useState, useRef } from "react";
 import Favorites from "../components/Favorites";
 import { Link, useLocation } from "react-router-dom";
+import { AiFillHome } from "react-icons/ai";
+import { Container, Paper, Grid, Typography, Button, IconButton } from "@mui/material";
 
 //*************************************************** */
 //****************** Draft Logic ******************** */
@@ -538,32 +540,6 @@ function Mock() {
 
     var playersSize = sum(posSizes);
 
-    // const [leagueSize, setLeagueSize] = useState(8);
-    // const [queuePosition, setQueuePosition] = useState(1);
-    // const [leagueType, setLeagueType] = useState('Standard');
-    // const [posSizes, setPosSizes] = useState([]);
-    // const [clock, setClock] = useState('Instant');
-
-    // const [playersSize, setPlayersSize] = useState(0);
-
-    // useEffect(() => {
-    //     setLeagueSize(homeInfo.leagueSize);
-    //     setQueuePosition(homeInfo.queuePosition);
-    //     setLeagueType(homeInfo.leagueType);
-    //     setPosSizes(homeInfo.playersSize);
-    //     setClock(homeInfo.clock);
-    //     setPlayersSize(sum(posSizes));
-    // }, [])
-
-    // //              q  r  w  t  f  k  d  b
-    // var posSizes = [1, 2, 2, 1, 1, 1, 1, 7];
-
-    // //Queue info
-    // const leagueSize = 4;
-    // const playersSize = sum(posSizes);
-    // const queuePosition = 2;
-    // const leagueType = 'STD';
-
     const [queueArr, setQueueArr] = useState(buildQueueArray(leagueSize, playersSize));
 
     const shiftQueue = (currDrafter, round) => {
@@ -670,17 +646,17 @@ function Mock() {
         }
     };
 
-    useEffect(() => {
-        let timer = null;
-        if (startClicked) {
-            timer = setInterval(() => {
-                setTimerNum(timerNum - 1);
-            }, 1000);
-        };
-        return () => {
-            clearInterval(timer);
-        };
-    });
+    // useEffect(() => {
+    //     let timer = null;
+    //     if (startClicked) {
+    //         timer = setInterval(() => {
+    //             setTimerNum(timerNum - 1);
+    //         }, 1000);
+    //     };
+    //     return () => {
+    //         clearInterval(timer);
+    //     };
+    // });
 
     const [round, setRound] = useState(1);
 
@@ -998,87 +974,87 @@ function Mock() {
     const simpleQueueArr = buildSimpleQueue(leagueSize, playersSize);
     const [currDrafter, setCurrDrafter] = useState(simpleQueueArr[queueIndex]);
 
-    useEffect(() => { // main draft loop logic
-        if (startClicked && !draftEnd) {
-            if (timerNum === -1) { // end users time
-                if (currDrafter !== queuePosition) {
-                    handleComputerDraft();
-                    setCurrDrafter(simpleQueueArr[queueIndex + 1]);
-                    setQueueIndex(queueIndex + 1);
-                    if ((queueIndex + 1) !== simpleQueueArr.length) {
-                        shiftQueue(currDrafter, round);
-                        if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
-                            setRound(round + 1);
-                        }
-                        if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
-                            setTimerNum(computerTime);
-                        } else {
-                            audio.play();
-                            setTimerNum(userTime);
-                        }
-                    } else {
-                        setDraftEnd(true);
-                        queueArr.shift()
-                        queueArr.shift()
-                    }
-                } else {
-                    setCurrDrafter(simpleQueueArr[queueIndex + 1]);
-                    setQueueIndex(queueIndex + 1);
-                    if ((queueIndex + 1) !== simpleQueueArr.length) {
-                        shiftQueue(currDrafter, round);
-                        if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
-                            setRound(round + 1);
-                        }
-                        if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
-                            setTimerNum(computerTime);
-                        } else {
-                            audio.play();
-                            setTimerNum(userTime);
-                        }
-                    } else {
-                        setDraftEnd(true);
-                        queueArr.shift()
-                        queueArr.shift()
-                    }
-                }
-            }
-        }; // end main draft logic loop
-    });
+    // useEffect(() => { // main draft loop logic
+    //     if (startClicked && !draftEnd) {
+    //         if (timerNum === -1) { // end users time
+    //             if (currDrafter !== queuePosition) {
+    //                 handleComputerDraft();
+    //                 setCurrDrafter(simpleQueueArr[queueIndex + 1]);
+    //                 setQueueIndex(queueIndex + 1);
+    //                 if ((queueIndex + 1) !== simpleQueueArr.length) {
+    //                     shiftQueue(currDrafter, round);
+    //                     if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
+    //                         setRound(round + 1);
+    //                     }
+    //                     if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
+    //                         setTimerNum(computerTime);
+    //                     } else {
+    //                         audio.play();
+    //                         setTimerNum(userTime);
+    //                     }
+    //                 } else {
+    //                     setDraftEnd(true);
+    //                     queueArr.shift()
+    //                     queueArr.shift()
+    //                 }
+    //             } else {
+    //                 setCurrDrafter(simpleQueueArr[queueIndex + 1]);
+    //                 setQueueIndex(queueIndex + 1);
+    //                 if ((queueIndex + 1) !== simpleQueueArr.length) {
+    //                     shiftQueue(currDrafter, round);
+    //                     if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
+    //                         setRound(round + 1);
+    //                     }
+    //                     if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
+    //                         setTimerNum(computerTime);
+    //                     } else {
+    //                         audio.play();
+    //                         setTimerNum(userTime);
+    //                     }
+    //                 } else {
+    //                     setDraftEnd(true);
+    //                     queueArr.shift()
+    //                     queueArr.shift()
+    //                 }
+    //             }
+    //         }
+    //     }; // end main draft logic loop
+    // });
 
-    useEffect(() => { // handling user on clock -> did not draft in time
-        if (currDrafter === queuePosition) {
-            if (timerNum === 0) {
-                handleAutoUserDraft();
-                setCurrDrafter(simpleQueueArr[queueIndex + 1]);
-                setQueueIndex(queueIndex + 1);
-                if ((queueIndex + 1) !== simpleQueueArr.length) {
-                    shiftQueue(currDrafter, round);
-                    if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
-                        setRound(round + 1);
-                    }
-                    if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
-                        setTimerNum(computerTime);
-                    } else {
-                        audio.play();
-                        setTimerNum(userTime);
-                    }
-                } else {
-                    setDraftEnd(true);
-                    queueArr.shift()
-                    queueArr.shift()
-                }
-            }
-        }
-    });
+    // useEffect(() => { // handling user on clock -> did not draft in time
+    //     if (currDrafter === queuePosition) {
+    //         if (timerNum === 0) {
+    //             handleAutoUserDraft();
+    //             setCurrDrafter(simpleQueueArr[queueIndex + 1]);
+    //             setQueueIndex(queueIndex + 1);
+    //             if ((queueIndex + 1) !== simpleQueueArr.length) {
+    //                 shiftQueue(currDrafter, round);
+    //                 if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
+    //                     setRound(round + 1);
+    //                 }
+    //                 if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
+    //                     setTimerNum(computerTime);
+    //                 } else {
+    //                     audio.play();
+    //                     setTimerNum(userTime);
+    //                 }
+    //             } else {
+    //                 setDraftEnd(true);
+    //                 queueArr.shift()
+    //                 queueArr.shift()
+    //             }
+    //         }
+    //     }
+    // });
 
-    useEffect(() => { // end draft -> info and grades
-        if (draftEnd) {
-            var ratings = getRatings(teamObjs, unalteredPlayers);
-            var teamRating = ratings.filter(x => x[0] === queuePosition)[0];
-            setDisplayInfo("Draft finished. Your team grade: " + teamRating[1]);
-            setStartClicked(false);
-        }
-    }, [draftEnd]);
+    // useEffect(() => { // end draft -> info and grades
+    //     if (draftEnd) {
+    //         var ratings = getRatings(teamObjs, unalteredPlayers);
+    //         var teamRating = ratings.filter(x => x[0] === queuePosition)[0];
+    //         setDisplayInfo("Draft finished. Your team grade: " + teamRating[1]);
+    //         setStartClicked(false);
+    //     }
+    // }, [draftEnd]);
 
     const teamRef = useRef(null);
     const playersRef = useRef(null);
@@ -1086,91 +1062,120 @@ function Mock() {
     const [teamHeight, setTeamHeight] = useState(0);
     const [playersHeight, setPlayersHeight] = useState(0);
 
-    useEffect(() => { // set div heights
-        setTeamHeight(teamRef.current.clientHeight);
-        setPlayersHeight(playersRef.current.clientHeight);
-    }, []);
+    // useEffect(() => { // set div heights
+    //     setTeamHeight(teamRef.current.clientHeight);
+    //     setPlayersHeight(playersRef.current.clientHeight);
+    // }, []);
 
     //***************************************************
 
     return (
-        <div className="mock-container">
-            <div className="header">
-                <h1 className="title">Minute Mock</h1>
-                <div className="header-info">
-                    <div className="start-container">
-                        <button 
-                            className="start-button" 
-                            onClick={() => handleStart()}
-                            id={(startClicked || draftEnd) ? 'hide-start' : ''}
-                        >
-                            Start
-                        </button>
-                    </div>
-                    <div className="return-container">
-                        <Link to="/home">
-                            <button 
-                                className="return-button"
-                            >
-                                Return To Home
-                            </button>
-                        </Link>
-                    </div>
-                    <div className="timer-container">
-                        <h3 className="timer">
-                            {timerNum !== -1 ? convertTime(timerNum) : '0:00'}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-            <div className="draft-info-container">
-                <h3 className="draft-info">{displayInfo}</h3>
-            </div>
-            <div className="player-queue">
-                <PlayerQueue
-                    queuePosition={queuePosition}
-                    queueArr={queueArr}
-                />
-            </div>
-            <div className="content-container">
-                <div className="team-container">
-                    <div className="team-players-container" ref={teamRef}>
-                        <Team 
-                            teamInfo={teamInfo}
-                            leagueSize={leagueSize}
-                            queuePosition={queuePosition}
-                            teamObjs={teamObjs}
-                            selectedOption={selectedOption}
-                            handleSelectedOption={handleSelectedOption}
-                            flattenTeamObjs={flattenTeamObjs}
-                        />
-                    </div>
-                </div>
-                <div className="player-container" ref={playersRef}>
-                    <Player 
-                        fav={handleFavorite}
-                        favPlayers={favPlayers}
-                        queuePosition={queuePosition}
-                        currDrafter={currDrafter}
-                        allPlayers={allPlayers}
-                        handleUserDraft={handleUserDraft}
-                        startClicked={startClicked}
-                        handleChangeSearch={handleChangeSearch}
-                        handleSearchDelete={handleSearchDelete}
-                        teamHeight={teamHeight}
-                    />
-                </div>
-                <div className="favorites-container">
-                    <h2 className="subtitle">Favorites</h2>
-                    <Favorites 
-                        favPlayers={favPlayers}
-                        handleRemoveFav={handleRemoveFav}
-                        teamHeight={teamHeight}
-                    />
-                </div>
-            </div>
-        </div>
+        <Container maxWidth='100vw' style={styles.mainContainer}>
+            <Paper style={styles.header}>
+                <Typography variant="h3" fontWeight={700} color='primary'>Minute Mock</Typography>
+                <IconButton color='primary'>
+                    <AiFillHome size={24}/>
+                </IconButton>
+            </Paper>
+            <Grid container spacing={0}>
+                <Grid item>
+                    <Typography>8</Typography>
+                </Grid>
+            </Grid>
+        </Container>
+        // <div className="mock-container">
+        //     <div className="header">
+        //         <h1 className="title">Minute Mock</h1>
+        //         <div className="header-info">
+        //             <div className="start-container">
+        //                 <button 
+        //                     className="start-button" 
+        //                     onClick={() => handleStart()}
+        //                     id={(startClicked || draftEnd) ? 'hide-start' : ''}
+        //                 >
+        //                     Start
+        //                 </button>
+        //             </div>
+        //             <div className="return-container">
+        //                 <Link to="/home">
+        //                     <button 
+        //                         className="return-button"
+        //                     >
+        //                         Return To Home
+        //                     </button>
+        //                 </Link>
+        //             </div>
+        //             <div className="timer-container">
+        //                 <h3 className="timer">
+        //                     {timerNum !== -1 ? convertTime(timerNum) : '0:00'}
+        //                 </h3>
+        //             </div>
+        //         </div>
+        //     </div>
+        //     <div className="draft-info-container">
+        //         <h3 className="draft-info">{displayInfo}</h3>
+        //     </div>
+        //     <div className="player-queue">
+        //         <PlayerQueue
+        //             queuePosition={queuePosition}
+        //             queueArr={queueArr}
+        //         />
+        //     </div>
+        //     <div className="content-container">
+        //         <div className="team-container">
+        //             <div className="team-players-container" ref={teamRef}>
+        //                 <Team 
+        //                     teamInfo={teamInfo}
+        //                     leagueSize={leagueSize}
+        //                     queuePosition={queuePosition}
+        //                     teamObjs={teamObjs}
+        //                     selectedOption={selectedOption}
+        //                     handleSelectedOption={handleSelectedOption}
+        //                     flattenTeamObjs={flattenTeamObjs}
+        //                 />
+        //             </div>
+        //         </div>
+        //         <div className="player-container" ref={playersRef}>
+        //             <Player 
+        //                 fav={handleFavorite}
+        //                 favPlayers={favPlayers}
+        //                 queuePosition={queuePosition}
+        //                 currDrafter={currDrafter}
+        //                 allPlayers={allPlayers}
+        //                 handleUserDraft={handleUserDraft}
+        //                 startClicked={startClicked}
+        //                 handleChangeSearch={handleChangeSearch}
+        //                 handleSearchDelete={handleSearchDelete}
+        //                 teamHeight={teamHeight}
+        //             />
+        //         </div>
+        //         <div className="favorites-container">
+        //             <h2 className="subtitle">Favorites</h2>
+        //             <Favorites 
+        //                 favPlayers={favPlayers}
+        //                 handleRemoveFav={handleRemoveFav}
+        //                 teamHeight={teamHeight}
+        //             />
+        //         </div>
+        //     </div>
+        // </div>
     );
+}
+
+const styles = {
+    mainContainer: {
+        padding: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column'
+    },
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        width: '100%',
+        padding: 10
+    }
 }
 
 export default Mock;
