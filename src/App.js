@@ -2,11 +2,13 @@ import Home from "./screens/Home";
 import Mock from "./screens/Mock";
 import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
 import { createTheme, ThemeProvider, Container, CssBaseline } from "@mui/material";
-import { orange, purple } from "@mui/material/colors";
+import { blue, deepOrange, amber } from "@mui/material/colors";
 
 const theme = createTheme({
   palette: {
-    mode: 'dark'
+    mode: 'dark',
+    primary: blue,
+    secondary: amber
   }
 })
 

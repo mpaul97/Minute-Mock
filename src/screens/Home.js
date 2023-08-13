@@ -10,6 +10,7 @@ import { AiFillInfoCircle, AiOutlineClose } from "react-icons/ai";
 import Modal from 'react-modal';
 import { Container, Typography, Paper, Button, IconButton, InputLabel, MenuItem, FormControl } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { lightBlue } from '@mui/material/colors';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
@@ -130,7 +131,7 @@ function Home() {
                                     sx={{m: 1}}
                                     key={x}
                                 >
-                                    <InputLabel key={x}>{x}</InputLabel>
+                                    <InputLabel key={x} style={{zIndex: 0}}>{x}</InputLabel>
                                     <Select
                                         value={players[x].variable}
                                         label={x}
@@ -228,7 +229,7 @@ const styles = {
             border: 0
         },
         overlay: {
-            background: 'rgba(255, 255, 255, 0.4)'
+            background: 'rgba(0, 0, 0, 0.7)'
         }
     },
     modalPaper: {

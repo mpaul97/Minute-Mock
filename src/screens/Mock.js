@@ -10,8 +10,8 @@ import { useDebugValue, useEffect, useState, useRef } from "react";
 import Favorites from "../components/Favorites";
 import { Link, useLocation } from "react-router-dom";
 import { AiFillHome, AiFillPlayCircle } from "react-icons/ai";
-import { Container, Paper, Grid, Typography, Chip, Button, IconButton } from "@mui/material";
-import { lightBlue } from "@mui/material/colors";
+import { Container, Paper, Grid, Typography, Chip, Button, IconButton, useTheme } from "@mui/material";
+import { blue, amber } from "@mui/material/colors";
 
 //*************************************************** */
 //****************** Draft Logic ******************** */
@@ -521,7 +521,6 @@ function buildQueueArray(leagueSize, playersSize) {
             }
         }
         if (i !== playersSize - 1) {
-            arr.push(new QueueObj(i + 2, -1));
             arr.push(new QueueObj(i + 2, 'Round ' + (i + 2)));
         }
     }
@@ -529,6 +528,7 @@ function buildQueueArray(leagueSize, playersSize) {
 }
 
 function Mock() {
+    const theme = useTheme();
     var leagueSize = 8;
     var queuePosition = 1;
     var leagueType = 'Standard';
@@ -556,8 +556,7 @@ function Mock() {
         let temp = queueArr;
         let index = temp.findIndex(x => x.queueVal === currDrafter && x.round === round);
         temp.splice(index, 1);
-        if (temp[0].queueVal.toString().includes('Round') && temp[1].queueVal === -1) {
-            temp.shift();
+        if (temp[0].queueVal.toString().includes('Round')) {
             temp.shift();
         }
         setQueueArr(temp);
@@ -1083,27 +1082,32 @@ function Mock() {
         <Container maxWidth='100vw' style={styles.mainContainer}>
             <Paper style={styles.header}>
                 <Typography variant="h3" fontWeight={700} color='primary' style={{width: '100%'}}>Minute Mock</Typography>
-                <Container style={styles.headerOptions}>   
-                    <IconButton color='primary'>
-                        <AiFillHome size={24}/>
-                    </IconButton>
+                <Container style={styles.headerOptions}>
+                    <Link to="/mock/home/">
+                        <IconButton color='primary'>
+                            <AiFillHome size={24}/>
+                        </IconButton>
+                    </Link>
                     <IconButton color='primary'>
                         <AiFillPlayCircle size={24}/>
                     </IconButton>
                     <Chip color='primary' label="0:00" style={{fontSize: 16}}></Chip>
                 </Container>
             </Paper>
-            <Container style={styles.draftInfoContainer}>
-                <Typography variant="h6" color='primary'>{displayInfo}</Typography>
+            <Container maxWidth={false} style={styles.draftInfoContainer}>
+                <Typography variant="h6" color='primary' fontWeight={600}>{displayInfo}</Typography>
             </Container>
             <Container maxWidth={false} style={styles.queueContainer}>
                 {queueArr.map((x) => {
+                    const isRound = ((typeof(x.queueVal) === 'string') && (x.queueVal.includes('Round')));
+                    const isUserPosition = x.queueVal === queuePosition;
                     return (
                         <Chip 
-                            color='primary' 
+                            color={(isRound || isUserPosition) ? 'secondary' : 'primary'}
                             label={x.queueVal} 
-                            style={((typeof(x.queueVal) === 'string') && (x.queueVal.includes('Round'))) ? styles.roundQueueObject : styles.queueObject}
+                            style={isRound ? styles.roundQueueObject : styles.queueObject}
                             key={x.round + '_' + x.queueVal}
+                            variant="outlined"
                         >
                         </Chip>
                     )
@@ -1236,7 +1240,8 @@ const styles = {
         borderRadius: 0,
         padding: 5,
         paddingTop: 20,
-        paddingBottom: 20
+        paddingBottom: 20,
+        fontWeight: 600
     },
     roundQueueObject: {
         fontSize: 16, 
@@ -1244,8 +1249,6 @@ const styles = {
         padding: 5,
         paddingTop: 20,
         paddingBottom: 20,
-        borderLeft: '2px solid black',
-        borderRight: '2px solid black',
         fontWeight: 700
     }
 }
