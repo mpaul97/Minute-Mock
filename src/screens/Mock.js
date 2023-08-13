@@ -1232,7 +1232,7 @@ const styles = {
         justifyContent: 'start',
         alignItems: 'start',
         width: '100%',
-        overflow: 'hidden',
+        overflow: 'scroll',
         padding: 0
     },
     queueObject: {

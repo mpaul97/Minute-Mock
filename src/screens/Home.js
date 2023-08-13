@@ -14,6 +14,7 @@ import {
     Chip
 } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import HelperService from '../services/HelperService.js'
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
@@ -23,12 +24,13 @@ const playerData = {
     'PPR': JSON.parse(JSON.stringify(playersPpr)),
     'Half-PPR': JSON.parse(JSON.stringify(playersHalf))
 }
+const helperService = new HelperService();
 
 function Home() {
 
     const [infoModalIsOpen, setInfoModalIsOpen] = useState(false);
     const [keeperModalIsOpen, setKeeperModalIsOpen] = useState(false);
-    const [keeperRoundModalIsOpen, setKeeperRoundModalIsOpen] = useState(false);
+    const [keeperSelectModalIsOpen, setKeeperSelectModalIsOpen] = useState(false);
 
     const [size, setSize] = useState(8);
     const [queue, setQueue] = useState(1);
@@ -42,6 +44,7 @@ function Home() {
     const [flexSize, setFlexSize] = useState(1);
     const [kSize, setKSize] = useState(1);
     const [dstSize, setDstSize] = useState(1);
+    const [benchSize, setBenchSize] = useState(7);
     const players = {
         'QB': {size: 2, variable: qbSize, setFunc: setQbSize},
         'RB': {size: 4, variable: rbSize, setFunc: setRbSize},
@@ -49,7 +52,8 @@ function Home() {
         'TE': {size: 2, variable: teSize, setFunc: setTeSize},
         'FLEX': {size: 4, variable: flexSize, setFunc: setFlexSize},
         'K': {size: 2, variable: kSize, setFunc: setKSize},
-        'DST': {size: 2, variable: dstSize, setFunc: setDstSize}
+        'DST': {size: 2, variable: dstSize, setFunc: setDstSize},
+        'BEN': {size: 10, variable: benchSize, setFunc: setBenchSize},
     }
     const [keeperSearchValue, setKeeperSearchValue] = useState('');
     const [keepers, setKeepers] = useState([]);
@@ -99,8 +103,16 @@ function Home() {
         setAllPlayers(playerData[type]);
     }
 
-    console.log(keeperSearchValue);
-    console.log(keepers);
+    // delete keeper chip
+    const handleKeeperDelete = (name) => {
+        setKeepers(keepers.filter(x => x !== name));
+    }
+
+    var roundNum = 0
+    useEffect(() => {
+        roundNum = helperService.sumArr([1, 1, 1]);
+        console.log(roundNum);
+    })
 
     return (
         <Container 
@@ -115,6 +127,7 @@ function Home() {
                 <IconButton color='primary' onClick={() => setInfoModalIsOpen(true)}>
                     <AiFillInfoCircle size={20}/>
                 </IconButton>
+                {/* Info Modal */}
                 <Modal
                     isOpen={infoModalIsOpen}
                     onRequestClose={() => setInfoModalIsOpen(false)}
@@ -142,9 +155,12 @@ function Home() {
                         </Typography>
                     </Paper>
                 </Modal>
+                {/* End Info Modal */}
+                {/* Main Options */}
                 {renderOption('League Size', sizes, size, setSizeAndQueue)}
                 {renderOption('Draft Position', Array.from({length: size}, (_, i) => i + 1), queue, setQueue)}
                 {renderOption('League Type', types, type, setTypeAndPlayers)}
+                {/* End Main Options */}
                 {/* Render player (select sizes for each position) */}
                 <Container
                     style={styles.optionsContainer}
@@ -176,14 +192,19 @@ function Home() {
                         })}
                     </Container>
                 </Container>
+                {/* End Render Players */}
                 {renderOption('Clock Speed', times, clock, setClock)}
+                {/* Keepers */}
                 <Container
                     style={styles.optionsContainer}
                 >
                     <Typography variant='h6' fontWeight={600} color="primary" style={{padding: 10}}>Keepers</Typography>
                     <Button variant='outlined' onClick={() => setKeeperModalIsOpen(true)}>Add Keepers</Button>
                 </Container>
+                {/* End Keepers */}
+                {/* Keepers Modal */}
                 <Modal
+                    id="keeper-modal"
                     isOpen={keeperModalIsOpen}
                     onRequestClose={() => setKeeperModalIsOpen(false)}
                     style={styles.modalStyle}
@@ -193,7 +214,7 @@ function Home() {
                         style={styles.keeperModalPaper}
                     >
                         <IconButton style={{float: 'right', top: 0}} onClick={() => setKeeperModalIsOpen(false)}>
-                            <AiOutlineClose size={16}/>
+                            <AiOutlineClose size={16} />
                         </IconButton>
                         <br></br>
                         <br></br>
@@ -214,9 +235,51 @@ function Home() {
                                 sx={{width: '100%'}}
                                 onChange={(event, newVal) => setKeeperSearchValue(newVal.name)}
                             />
-                            <IconButton color='primary' onClick={() => setKeeperRoundModalIsOpen(true)}>
+                            <IconButton 
+                                color='primary' 
+                                onClick={() => {
+                                    if (keeperSearchValue.length > 0) {
+                                        setKeeperSelectModalIsOpen(true)
+                                    }
+                                }}
+                            >
                                 <AiFillPlusCircle size={34} />
                             </IconButton>
+                            {/* Keepers Select Modal (Select round for keeper) */}
+                            <Modal
+                                isOpen={keeperSelectModalIsOpen}
+                                onRequestClose={() => setKeeperSelectModalIsOpen(false)}
+                                style={styles.keeperSelectModalStyle}
+                                appElement={document.getElementById('keeper-modal')}
+                            >
+                                <Paper
+                                    style={styles.keeperSelectModalPaper}
+                                >
+                                    <IconButton style={{float: 'right', top: 0}} onClick={() => setKeeperSelectModalIsOpen(false)}>
+                                        <AiOutlineClose size={16}/>
+                                    </IconButton>
+                                    <br></br>
+                                    <br></br>
+                                    <FormControl
+                                        sx={{m: 1}}
+                                    >
+                                        <InputLabel style={{zIndex: 0}}>Round</InputLabel>
+                                        <Select
+                                            value='Round'
+                                            label='Round'
+                                            // onChange={(e) => players[x].setFunc(parseInt(e.target.value))}
+                                        >
+                                            {Array.from({length: 4}, (_, i) => i + 1).map((s) => {
+                                                return (
+                                                    <MenuItem key={s} value={s}>{s}</MenuItem>
+                                                )
+                                            })
+                                            }
+                                        </Select>
+                                    </FormControl>
+                                </Paper>
+                            </Modal>
+                            {/* End Keepers Select Modal */}
                         </Container>
                         <Container maxWidth={false} style={styles.keepersContainer}>
                             {keepers.map((x) => {
@@ -224,13 +287,17 @@ function Home() {
                                     <Chip
                                         label={x}
                                         color='primary'
+                                        onDelete={() => handleKeeperDelete(x)}
+                                        key={x}
                                     />
                                 )
                             })}
                         </Container>
                     </Paper>
                 </Modal>
+                {/* End Keepers Modal */}
                 <Divider />
+                {/* Submit to Mock */}
                 <Link
                     to='/mock/content'
                     state={{
@@ -252,6 +319,7 @@ function Home() {
                         Submit
                     </Button>
                 </Link>
+                {/* End Submit */}
             </Paper>
         </Container>
     )
@@ -299,12 +367,6 @@ const styles = {
         paddingBottom: 40,
         textAlign: 'center'
     },
-    keeperModalPaper: {
-        width: '100%',
-        height: 400,
-        padding: 20,
-        textAlign: 'center'
-    },
     optionsContainer: {
         width: '100%',
         display: 'flex',
@@ -320,6 +382,23 @@ const styles = {
         gap: 5,
         padding: 10
     },
+    keeperSelectModalStyle: {
+        content: {
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: 'fit-content',
+            boxShadow: 24,
+            padding: 0,
+            margin: 0,
+            border: 0
+        },
+        overlay: {
+            background: 'rgba(255, 255, 255, 0.3)'
+        }
+    },
     keeperModalSearchContainer: {
         display: 'flex',
         justifyContent: 'center',
@@ -331,7 +410,19 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20
-    }
+    },
+    keeperModalPaper: {
+        width: '100%',
+        height: 400,
+        padding: 20,
+        textAlign: 'center'
+    },
+    keeperSelectModalPaper: {
+        width: '100%',
+        height: 'fit-content',
+        padding: 20,
+        textAlign: 'center'
+    },
 };
 
 export default Home;
