@@ -1,24 +1,34 @@
 import React, { Component, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import { useState } from 'react';
-import './Home.css';
-import HomeButton from '../components/HomeButton';
-import QueueButton from '../components/QueueButton';
-import cx from 'classnames';
-import PlayerInput from '../components/PlayerInput';
-import { AiFillInfoCircle, AiOutlineClose } from "react-icons/ai";
+import playersStd from '../assets/jsonData_std.json';
+import playersPpr from '../assets/jsonData_ppr.json';
+import playersHalf from '../assets/jsonData_half.json';
+import { AiFillInfoCircle, AiOutlineClose, AiFillPlusCircle } from "react-icons/ai";
 import Modal from 'react-modal';
-import { Container, Typography, Paper, Button, IconButton, InputLabel, MenuItem, FormControl } from '@mui/material';
+import { 
+    Container, Typography, Paper, 
+    Button, IconButton, InputLabel, 
+    MenuItem, FormControl, Divider,
+    Autocomplete, TextField, List,
+    Chip
+} from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { lightBlue } from '@mui/material/colors';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
 const times = ['Instant', 'Fast', 'Medium', 'Slow'];
+const playerData = {
+    'Standard': JSON.parse(JSON.stringify(playersStd)),
+    'PPR': JSON.parse(JSON.stringify(playersPpr)),
+    'Half-PPR': JSON.parse(JSON.stringify(playersHalf))
+}
 
 function Home() {
 
     const [infoModalIsOpen, setInfoModalIsOpen] = useState(false);
+    const [keeperModalIsOpen, setKeeperModalIsOpen] = useState(false);
+    const [keeperRoundModalIsOpen, setKeeperRoundModalIsOpen] = useState(false);
 
     const [size, setSize] = useState(8);
     const [queue, setQueue] = useState(1);
@@ -41,6 +51,8 @@ function Home() {
         'K': {size: 2, variable: kSize, setFunc: setKSize},
         'DST': {size: 2, variable: dstSize, setFunc: setDstSize}
     }
+    const [keeperSearchValue, setKeeperSearchValue] = useState('');
+    const [keepers, setKeepers] = useState([]);
 
     // setSize and update queue position if greater than size
     const setSizeAndQueue = (size) => {
@@ -75,7 +87,21 @@ function Home() {
             </Container>
         )
     };
-     
+
+    // Init Players by league type
+    const [allPlayers, setAllPlayers] = useState(() => {
+        return playerData[type];
+    });
+
+    // set type and update playerData
+    const setTypeAndPlayers = (type) => {
+        setType(type);
+        setAllPlayers(playerData[type]);
+    }
+
+    console.log(keeperSearchValue);
+    console.log(keepers);
+
     return (
         <Container 
             maxWidth="100vw" 
@@ -96,7 +122,7 @@ function Home() {
                     appElement={document.body}
                 >
                     <Paper
-                        style={styles.modalPaper}
+                        style={styles.infoModalPaper}
                     >
                         <IconButton style={{float: 'right', top: 0}} onClick={() => setInfoModalIsOpen(false)}>
                             <AiOutlineClose size={16}/>
@@ -118,7 +144,7 @@ function Home() {
                 </Modal>
                 {renderOption('League Size', sizes, size, setSizeAndQueue)}
                 {renderOption('Draft Position', Array.from({length: size}, (_, i) => i + 1), queue, setQueue)}
-                {renderOption('League Type', types, type, setType)}
+                {renderOption('League Type', types, type, setTypeAndPlayers)}
                 {/* Render player (select sizes for each position) */}
                 <Container
                     style={styles.optionsContainer}
@@ -151,6 +177,60 @@ function Home() {
                     </Container>
                 </Container>
                 {renderOption('Clock Speed', times, clock, setClock)}
+                <Container
+                    style={styles.optionsContainer}
+                >
+                    <Typography variant='h6' fontWeight={600} color="primary" style={{padding: 10}}>Keepers</Typography>
+                    <Button variant='outlined' onClick={() => setKeeperModalIsOpen(true)}>Add Keepers</Button>
+                </Container>
+                <Modal
+                    isOpen={keeperModalIsOpen}
+                    onRequestClose={() => setKeeperModalIsOpen(false)}
+                    style={styles.modalStyle}
+                    appElement={document.body}
+                >
+                    <Paper
+                        style={styles.keeperModalPaper}
+                    >
+                        <IconButton style={{float: 'right', top: 0}} onClick={() => setKeeperModalIsOpen(false)}>
+                            <AiOutlineClose size={16}/>
+                        </IconButton>
+                        <br></br>
+                        <br></br>
+                        <Container maxWidth={false} style={styles.keeperModalSearchContainer}>
+                            <Autocomplete
+                                disableClearable
+                                options={allPlayers.sort((a, b) => b.position.localeCompare(a.position))}
+                                groupBy={(option) => option.position}
+                                getOptionLabel={(option) => option.name}
+                                renderInput={(params) => <TextField {...params} label='Players'/>}
+                                ListboxProps={
+                                    {
+                                        style: {
+                                            maxHeight: 200
+                                        }
+                                    }
+                                }
+                                sx={{width: '100%'}}
+                                onChange={(event, newVal) => setKeeperSearchValue(newVal.name)}
+                            />
+                            <IconButton color='primary' onClick={() => setKeeperRoundModalIsOpen(true)}>
+                                <AiFillPlusCircle size={34} />
+                            </IconButton>
+                        </Container>
+                        <Container maxWidth={false} style={styles.keepersContainer}>
+                            {keepers.map((x) => {
+                                return (
+                                    <Chip
+                                        label={x}
+                                        color='primary'
+                                    />
+                                )
+                            })}
+                        </Container>
+                    </Paper>
+                </Modal>
+                <Divider />
                 <Link
                     to='/mock/content'
                     state={{
@@ -174,26 +254,6 @@ function Home() {
                 </Link>
             </Paper>
         </Container>
-        //         <div className='section-container submit'>
-        //             <Link 
-        //                 to="/content"
-        //                 state={{
-        //                     leagueSize: size,
-        //                     queuePosition: queue,
-        //                     leagueType: type,
-        //                     playersSize: [qbSize, rbSize, wrSize, teSize, flexSize, kSize, dstSize, 7],
-        //                     clock: clock
-        //                 }}
-        //             >
-        //                 <input 
-        //                     className="home-button submit" 
-        //                     type='submit' 
-        //                     value='Submit'>
-        //                 </input>
-        //             </Link>
-        //         </div>
-        //     </div>
-        // </div>
     )
 }
 
@@ -203,7 +263,8 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: '5%'
+        paddingTop: '5%',
+        paddingBottom: '5%'
     },
     paperOptions: {
         width: '80%', 
@@ -232,10 +293,16 @@ const styles = {
             background: 'rgba(0, 0, 0, 0.7)'
         }
     },
-    modalPaper: {
+    infoModalPaper: {
         width: '100%',
         padding: 20,
         paddingBottom: 40,
+        textAlign: 'center'
+    },
+    keeperModalPaper: {
+        width: '100%',
+        height: 400,
+        padding: 20,
         textAlign: 'center'
     },
     optionsContainer: {
@@ -253,8 +320,17 @@ const styles = {
         gap: 5,
         padding: 10
     },
-    select: {
-        borderColor: 'red'
+    keeperModalSearchContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%'
+    },
+    keepersContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20
     }
 };
 
