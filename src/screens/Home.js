@@ -11,10 +11,11 @@ import {
     Button, IconButton, InputLabel, 
     MenuItem, FormControl, Divider,
     Autocomplete, TextField, List,
-    Chip
+    Chip,
 } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import HelperService from '../services/HelperService.js'
+import HelperService from '../services/HelperService';
+import Keeper from '../classes/Keeper';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
@@ -30,7 +31,6 @@ function Home() {
 
     const [infoModalIsOpen, setInfoModalIsOpen] = useState(false);
     const [keeperModalIsOpen, setKeeperModalIsOpen] = useState(false);
-    const [keeperSelectModalIsOpen, setKeeperSelectModalIsOpen] = useState(false);
 
     const [size, setSize] = useState(8);
     const [queue, setQueue] = useState(1);
@@ -55,8 +55,14 @@ function Home() {
         'DST': {size: 2, variable: dstSize, setFunc: setDstSize},
         'BEN': {size: 10, variable: benchSize, setFunc: setBenchSize},
     }
-    const [keeperSearchValue, setKeeperSearchValue] = useState('');
+
+    const [keeperSearchValue, setKeeperSearchValue] = useState(null);
     const [keepers, setKeepers] = useState([]);
+    const [keeperRound, setKeeperRound] = useState(1);
+    const [keeperAddClicked, setKeeperAddClicked] = useState(false);
+    const [keeperErrorMessage, setKeeperErrorMessage] = useState('Player already added.');
+
+    const [totalRounds, setTotalRounds] = useState(helperService.sum(Object.keys(players).map(key => players[key].variable)))
 
     // setSize and update queue position if greater than size
     const setSizeAndQueue = (size) => {
@@ -108,10 +114,17 @@ function Home() {
         setKeepers(keepers.filter(x => x !== name));
     }
 
-    var roundNum = 0
+    // close keeper modal, reset keeper add clicked, and clear keeper search value
+    const onKeeperCloseModal = () => {
+        setKeeperModalIsOpen(false);
+        setKeeperAddClicked(false);
+        setKeeperSearchValue(null);
+    }
+
+    // update number of total rounds
     useEffect(() => {
-        roundNum = helperService.sumArr([1, 1, 1]);
-        console.log(roundNum);
+        setTotalRounds(helperService.sum(Object.keys(players).map(key => players[key].variable)));
+        console.log(totalRounds)
     })
 
     return (
@@ -181,10 +194,10 @@ function Home() {
                                         onChange={(e) => players[x].setFunc(parseInt(e.target.value))}
                                     >
                                         {Array.from({length: players[x].size}, (_, i) => i + 1).map((s) => {
-                                            return (
-                                                <MenuItem key={x + '_' + s} value={s}>{s}</MenuItem>
-                                            )
-                                        })
+                                                return (
+                                                    <MenuItem key={x + '_' + s} value={s}>{s}</MenuItem>
+                                                )
+                                            })
                                         }
                                     </Select>
                                 </FormControl>
@@ -206,93 +219,102 @@ function Home() {
                 <Modal
                     id="keeper-modal"
                     isOpen={keeperModalIsOpen}
-                    onRequestClose={() => setKeeperModalIsOpen(false)}
+                    onRequestClose={onKeeperCloseModal}
                     style={styles.modalStyle}
                     appElement={document.body}
                 >
                     <Paper
                         style={styles.keeperModalPaper}
                     >
-                        <IconButton style={{float: 'right', top: 0}} onClick={() => setKeeperModalIsOpen(false)}>
+                        <IconButton 
+                            style={{float: 'right', top: 0}} 
+                            onClick={onKeeperCloseModal}
+                        >
                             <AiOutlineClose size={16} />
                         </IconButton>
                         <br></br>
                         <br></br>
+                        {/* Keeper Search Container/Form */}
                         <Container maxWidth={false} style={styles.keeperModalSearchContainer}>
-                            <Autocomplete
-                                disableClearable
-                                options={allPlayers.sort((a, b) => b.position.localeCompare(a.position))}
-                                groupBy={(option) => option.position}
-                                getOptionLabel={(option) => option.name}
-                                renderInput={(params) => <TextField {...params} label='Players'/>}
-                                ListboxProps={
-                                    {
-                                        style: {
-                                            maxHeight: 200
+                            <FormControl style={styles.keeperForm}>
+                                <Autocomplete
+                                    disableClearable
+                                    required
+                                    options={allPlayers.sort((a, b) => b.position.localeCompare(a.position))}
+                                    groupBy={(option) => option.position}
+                                    getOptionLabel={(option) => option.name}
+                                    renderInput={(params) => 
+                                        <TextField 
+                                            {...params} 
+                                            label='Players'
+                                        />
+                                    }
+                                    ListboxProps={
+                                        {
+                                            style: {
+                                                maxHeight: 200
+                                            }
                                         }
                                     }
-                                }
-                                sx={{width: '100%'}}
-                                onChange={(event, newVal) => setKeeperSearchValue(newVal.name)}
-                            />
-                            <IconButton 
-                                color='primary' 
-                                onClick={() => {
-                                    if (keeperSearchValue.length > 0) {
-                                        setKeeperSelectModalIsOpen(true)
-                                    }
-                                }}
-                            >
-                                <AiFillPlusCircle size={34} />
-                            </IconButton>
-                            {/* Keepers Select Modal (Select round for keeper) */}
-                            <Modal
-                                isOpen={keeperSelectModalIsOpen}
-                                onRequestClose={() => setKeeperSelectModalIsOpen(false)}
-                                style={styles.keeperSelectModalStyle}
-                                appElement={document.getElementById('keeper-modal')}
-                            >
-                                <Paper
-                                    style={styles.keeperSelectModalPaper}
-                                >
-                                    <IconButton style={{float: 'right', top: 0}} onClick={() => setKeeperSelectModalIsOpen(false)}>
-                                        <AiOutlineClose size={16}/>
-                                    </IconButton>
-                                    <br></br>
-                                    <br></br>
-                                    <FormControl
-                                        sx={{m: 1}}
+                                    sx={{width: '50%'}}
+                                    onChange={(event, newVal) => setKeeperSearchValue(newVal.name)}
+                                />
+                                <FormControl>
+                                    <InputLabel style={{zIndex: 0}}>Round</InputLabel>
+                                    <Select
+                                        required
+                                        value={keeperRound}
+                                        label="Round"
+                                        onChange={(e) => setKeeperRound(parseInt(e.target.value))}
+                                        sx={{width: 70}}
                                     >
-                                        <InputLabel style={{zIndex: 0}}>Round</InputLabel>
-                                        <Select
-                                            value='Round'
-                                            label='Round'
-                                            // onChange={(e) => players[x].setFunc(parseInt(e.target.value))}
-                                        >
-                                            {Array.from({length: 4}, (_, i) => i + 1).map((s) => {
+                                        {Array.from({length: totalRounds}, (_, i) => i + 1).map((s) => {
                                                 return (
                                                     <MenuItem key={s} value={s}>{s}</MenuItem>
                                                 )
                                             })
+                                        }
+                                    </Select>
+                                </FormControl>
+                                <IconButton 
+                                    color='primary' 
+                                    type='submit'
+                                    onClick={() => {
+                                        if (keeperSearchValue) {
+                                            if (keepers.filter(x => x.name === keeperSearchValue).length === 0) {
+                                                setKeepers([...keepers, new Keeper(keeperSearchValue, keeperRound)])
+                                                setKeeperAddClicked(false);
+                                            } else {
+                                                setKeeperErrorMessage('Player already added.')
+                                                setKeeperAddClicked(true);
                                             }
-                                        </Select>
-                                    </FormControl>
-                                </Paper>
-                            </Modal>
-                            {/* End Keepers Select Modal */}
+                                        } else {
+                                            setKeeperErrorMessage('Player field is empty.')
+                                            setKeeperAddClicked(true);
+                                        }
+                                    }}
+                                >
+                                    <AiFillPlusCircle size={34} />
+                                </IconButton>
+                            </FormControl>
                         </Container>
+                        <Typography color='error' sx={{p: 1}}>{keeperAddClicked ? keeperErrorMessage : ''}</Typography>
+                        {/* End Keeper Search Container/Form */}
+                        {/* Keepers Chip List */}
                         <Container maxWidth={false} style={styles.keepersContainer}>
                             {keepers.map((x) => {
                                 return (
                                     <Chip
-                                        label={x}
+                                        label={x.name + ' | Round ' + x.round}
                                         color='primary'
                                         onDelete={() => handleKeeperDelete(x)}
-                                        key={x}
+                                        key={x.name}
                                     />
                                 )
                             })}
                         </Container>
+                        {/* End Keepers Chip List */}
+                        <Button variant='outlined' color='primary' onClick={onKeeperCloseModal}>Done</Button>
                     </Paper>
                 </Modal>
                 {/* End Keepers Modal */}
@@ -305,7 +327,8 @@ function Home() {
                         queuePosition: queue,
                         leagueType: type,
                         playersSize: Object.keys(players).map(key => players[key].variable),
-                        clock: clock
+                        clock: clock,
+                        keepers: keepers
                     }}
                 >
                     <Button 
@@ -352,19 +375,20 @@ const styles = {
             transform: 'translate(-50%, -50%)',
             width: '80%',
             height: 'fit-content',
-            boxShadow: 24,
+            boxShadow: 36,
             padding: 0,
             margin: 0,
-            border: 0
+            border: 0,
+            background: 'transparent'
         },
         overlay: {
-            background: 'rgba(0, 0, 0, 0.7)'
+            background: 'rgba(0, 0, 0, 0.8)'
         }
     },
     infoModalPaper: {
         width: '100%',
         padding: 20,
-        paddingBottom: 40,
+        paddingBottom: 60,
         textAlign: 'center'
     },
     optionsContainer: {
@@ -382,46 +406,32 @@ const styles = {
         gap: 5,
         padding: 10
     },
-    keeperSelectModalStyle: {
-        content: {
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '80%',
-            height: 'fit-content',
-            boxShadow: 24,
-            padding: 0,
-            margin: 0,
-            border: 0
-        },
-        overlay: {
-            background: 'rgba(255, 255, 255, 0.3)'
-        }
-    },
     keeperModalSearchContainer: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%'
     },
-    keepersContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20
-    },
     keeperModalPaper: {
-        width: '100%',
-        height: 400,
-        padding: 20,
-        textAlign: 'center'
-    },
-    keeperSelectModalPaper: {
         width: '100%',
         height: 'fit-content',
         padding: 20,
         textAlign: 'center'
+    },
+    keeperForm: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row',
+        width: '100%'
+    },
+    keepersContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column',
+        gap: 10,
+        paddingBottom: 20
     },
 };
 
