@@ -11,16 +11,20 @@ import { Link, useLocation } from "react-router-dom";
 import { AiFillHome, AiFillPlayCircle } from "react-icons/ai";
 import { Container, Paper, Grid, Typography, Chip, Button, IconButton } from "@mui/material";
 import { blue, amber } from "@mui/material/colors";
-import HelperService from '../services/HelperService.js';
+import Helper from '../models/Helper.js';
 
-const helperService = new HelperService();
+const helper = new Helper();
 
 function Mock() {
 
     var leagueSize = 8;
     var queuePosition = 1;
     var leagueType = 'Standard';
-    var positionSizes = [1, 2, 2, 1, 1, 1, 1, 7];
+    var positionSizes = {
+        'QB': {size: 1}, 'RB': {size: 2}, 'WR': {size: 2},
+        'TE': {size: 1}, 'FLEX': {size: 1}, 'K': {size: 1},
+        'DST': {size: 1}, 'BEN': {size: 7},
+    }
     var clock = 'Instant';
     var keepers = [];
     try {
@@ -29,15 +33,17 @@ function Mock() {
         leagueSize = homeInfo.leagueSize;
         queuePosition = homeInfo.queuePosition;
         leagueType = homeInfo.leagueType;
-        positionSizes = homeInfo.playersSize;
+        positionSizes = homeInfo.positionSizes;
         clock = homeInfo.clock;
         keepers = homeInfo.keepers;
     } catch (error) {
         console.log('Props not found, using default values.');
     }
 
-    var playersSize = helperService.sum(positionSizes);
-    const [queueArr, setQueueArr] = useState(helperService.buildQueueArray(leagueSize, playersSize));
+    const numPositionSizes = Object.keys(positionSizes).map(key => positionSizes[key].size);
+
+    const totalPositionSize = helper.sum(numPositionSizes);
+    const [queueArr, setQueueArr] = useState(helper.buildQueueArray(leagueSize, totalPositionSize));
 
     const [displayInfo, setDisplayInfo] = useState("Click \"Start\" to begin");
 

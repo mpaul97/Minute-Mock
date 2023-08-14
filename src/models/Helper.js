@@ -1,4 +1,4 @@
-import QueueObj from '../classes/QueueObject';
+import QueueObj from './QueueObject';
 
 class Helper {
     constructor() {}

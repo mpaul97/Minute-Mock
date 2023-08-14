@@ -14,8 +14,8 @@ import {
     Chip,
 } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import HelperService from '../services/HelperService';
-import Keeper from '../classes/Keeper';
+import Helper from '../models/Helper';
+import Keeper from '../models/Keeper';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
@@ -25,7 +25,7 @@ const playerData = {
     'PPR': JSON.parse(JSON.stringify(playersPpr)),
     'Half-PPR': JSON.parse(JSON.stringify(playersHalf))
 }
-const helperService = new HelperService();
+const helper = new Helper();
 
 function Home() {
 
@@ -62,7 +62,7 @@ function Home() {
     const [keeperAddClicked, setKeeperAddClicked] = useState(false);
     const [keeperErrorMessage, setKeeperErrorMessage] = useState('Player already added.');
 
-    const [totalRounds, setTotalRounds] = useState(helperService.sum(Object.keys(players).map(key => players[key].variable)))
+    const [totalRounds, setTotalRounds] = useState(helper.sum(Object.keys(players).map(key => players[key].variable)))
 
     // setSize and update queue position if greater than size
     const setSizeAndQueue = (size) => {
@@ -121,9 +121,18 @@ function Home() {
         setKeeperSearchValue(null);
     }
 
+    // get position sizes to dict object
+    const getPositionSizes = () => {
+        const obj = {};
+        Object.keys(players).map(key => {
+            obj[key] = {size: players[key].variable}
+        });
+        return obj;
+    }
+
     // update number of total rounds
     useEffect(() => {
-        setTotalRounds(helperService.sum(Object.keys(players).map(key => players[key].variable)));
+        setTotalRounds(helper.sum(Object.keys(players).map(key => players[key].variable)));
         console.log(totalRounds)
     })
 
@@ -326,7 +335,7 @@ function Home() {
                         leagueSize: size,
                         queuePosition: queue,
                         leagueType: type,
-                        playersSize: Object.keys(players).map(key => players[key].variable),
+                        positionSizes: getPositionSizes(),
                         clock: clock,
                         keepers: keepers
                     }}
