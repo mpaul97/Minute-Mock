@@ -1,5 +1,6 @@
 import Home from "./screens/Home";
 import Mock from "./screens/Mock";
+import Testing from "./screens/Testing";
 import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
 import { createTheme, ThemeProvider, Container, CssBaseline } from "@mui/material";
 import { blue, deepOrange, amber } from "@mui/material/colors";
@@ -22,7 +23,7 @@ function App() {
           <Route path="/mock/content" element={<Mock />} />
         </Routes>
       </BrowserRouter>
-      {/* <Mock /> */}
+      {/* <Testing /> */}
     </ThemeProvider>
   )
 }

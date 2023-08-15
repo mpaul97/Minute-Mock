@@ -9,9 +9,17 @@ import { useDebugValue, useEffect, useState, useRef } from "react";
 import Favorites from "../components/Favorites";
 import { Link, useLocation } from "react-router-dom";
 import { AiFillHome, AiFillPlayCircle } from "react-icons/ai";
-import { Container, Paper, Grid, Typography, Chip, Button, IconButton } from "@mui/material";
+import { 
+    Container, Paper, Grid, 
+    Typography, Chip, Button, 
+    IconButton, Divider, FormControl, 
+    InputLabel, Select, MenuItem,
+    Box
+} from "@mui/material";
 import { blue, amber } from "@mui/material/colors";
-import Helper from '../models/Helper.js';
+import Helper from '../models/Helper';
+import TeamObj from '../models/TeamObj';
+import Teams from "../models/Teams";
 
 const helper = new Helper();
 
@@ -46,6 +54,57 @@ function Mock() {
     const [queueArr, setQueueArr] = useState(helper.buildQueueArray(leagueSize, totalPositionSize));
 
     const [displayInfo, setDisplayInfo] = useState("Click \"Start\" to begin");
+
+    const teams = new Teams(leagueSize, positionSizes);
+    const [allTeams, setAllTeams] = useState(teams.initTeams());
+    const [displayedTeam, setDisplayedTeam] = useState(1);
+
+    const renderTeam = () => {
+        return (
+            <Paper style={styles.teamPlayerPaper}>
+                {Object.keys(allTeams[displayedTeam]).map((position) => {
+                    return ((allTeams[displayedTeam][position]).map((player, index) => {
+                        return (
+                            <Container 
+                                style={styles.teamPlayerContainer}
+                            >
+                                <Typography 
+                                    color='primary'
+                                    key={position + '_' + player.name + '_' + index}
+                                    style={styles.teamPlayer}
+                                >
+                                    {position}: {player.name}
+                                </Typography>
+                                <Divider />
+                            </Container>
+                        )
+                    })
+                )})
+                }
+                <FormControl
+                    sx={{width: '100%'}}
+                >
+                    <Select
+                        value={queuePosition}
+                        label="Team"
+                        displayEmpty
+                        variant="standard"
+                        sx={{
+                            padding: 1
+                        }}
+                        // onChange={(e) => players[x].setFunc(parseInt(e.target.value))}
+                    >
+                        {Array.from({length: leagueSize}, (_, i) => i + 1).map((s) => {
+                                return (
+                                    <MenuItem key={s} value={s}>Team {s}</MenuItem>
+                                )
+                            })
+                        }
+                    </Select>
+                </FormControl>
+            </Paper>
+        )
+    };
 
     return (
         <Container maxWidth='100vw' style={styles.mainContainer}>
@@ -93,8 +152,8 @@ function Mock() {
             </Container>
             {/* End Display Queue Position/Round */}
             <Grid container spacing={0}>
-                <Grid item xs={2}>
-                    <Paper></Paper>
+                <Grid item xs={3}>
+                    {renderTeam()}
                 </Grid>
             </Grid>
         </Container>
@@ -166,6 +225,18 @@ const styles = {
         paddingBottom: 20,
         fontWeight: 700,
         marginRight: 5
+    },
+    teamPlayerPaper: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'start'
+    },
+    teamPlayerContainer: {
+        padding: 0
+    },
+    teamPlayer: {
+        padding: 8
     }
 }
 
