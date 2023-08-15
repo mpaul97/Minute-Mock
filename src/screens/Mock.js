@@ -14,7 +14,9 @@ import {
     Typography, Chip, Button, 
     IconButton, Divider, FormControl, 
     InputLabel, Select, MenuItem,
-    Box
+    Box, TableContainer, Table,
+    TableHead, TableRow, TableCell,
+    TableBody
 } from "@mui/material";
 import { blue, amber } from "@mui/material/colors";
 import Helper from '../models/Helper';
@@ -57,7 +59,7 @@ function Mock() {
 
     const teams = new Teams(leagueSize, positionSizes);
     const [allTeams, setAllTeams] = useState(teams.initTeams());
-    const [displayedTeam, setDisplayedTeam] = useState(1);
+    const [displayedTeam, setDisplayedTeam] = useState(queuePosition);
 
     const renderTeam = () => {
         return (
@@ -85,14 +87,14 @@ function Mock() {
                     sx={{width: '100%'}}
                 >
                     <Select
-                        value={queuePosition}
+                        value={displayedTeam}
                         label="Team"
                         displayEmpty
                         variant="standard"
                         sx={{
                             padding: 1
                         }}
-                        // onChange={(e) => players[x].setFunc(parseInt(e.target.value))}
+                        onChange={(e) => setDisplayedTeam(parseInt(e.target.value))}
                     >
                         {Array.from({length: leagueSize}, (_, i) => i + 1).map((s) => {
                                 return (
@@ -154,6 +156,21 @@ function Mock() {
             <Grid container spacing={0}>
                 <Grid item xs={3}>
                     {renderTeam()}
+                </Grid>
+                <Grid item xs={6}>
+                    <TableContainer component={Paper}>
+                        <Table size="small" aria-label="a dense table">
+                            <TableHead>
+                            <TableRow>
+                                <TableCell>Dessert (100g serving)</TableCell>
+                                <TableCell align="right">Calories</TableCell>
+                                <TableCell align="right">Fat&nbsp;(g)</TableCell>
+                                <TableCell align="right">Carbs&nbsp;(g)</TableCell>
+                                <TableCell align="right">Protein&nbsp;(g)</TableCell>
+                            </TableRow>
+                            </TableHead>
+                        </Table>
+                    </TableContainer>
                 </Grid>
             </Grid>
         </Container>
