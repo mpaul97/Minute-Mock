@@ -16,8 +16,10 @@ import {
     InputLabel, Select, MenuItem,
     Box, TableContainer, Table,
     TableHead, TableRow, TableCell,
-    TableBody
+    TableBody, useMediaQuery,
+    Tabs, Tab
 } from "@mui/material";
+import { TabPanel, TabContext } from '@mui/lab';
 import { blue, amber } from "@mui/material/colors";
 import Helper from '../models/Helper';
 import TeamObj from '../models/TeamObj';
@@ -26,6 +28,8 @@ import Teams from "../models/Teams";
 const helper = new Helper();
 
 function Mock() {
+    const isWideScreen = useMediaQuery('(min-width: 800px)');
+    const [tabValue, setTabValue] = useState('Teams');
 
     var leagueSize = 8;
     var queuePosition = 1;
@@ -63,12 +67,21 @@ function Mock() {
 
     const renderTeam = () => {
         return (
-            <Paper style={styles.teamPlayerPaper}>
+            <Box 
+                style={styles.teamPlayerPaper}
+                display="flex"
+                flexDirection="column"
+                minHeight="80vh"
+                component={Paper}
+                // mb="36px"
+            >
                 {Object.keys(allTeams[displayedTeam]).map((position) => {
                     return ((allTeams[displayedTeam][position]).map((player, index) => {
                         return (
-                            <Container 
+                            <Box 
                                 style={styles.teamPlayerContainer}
+                                flexGrow={1}
+                                width='100%'
                             >
                                 <Typography 
                                     color='primary'
@@ -78,33 +91,35 @@ function Mock() {
                                     {position}: {player.name}
                                 </Typography>
                                 <Divider />
-                            </Container>
+                            </Box>
                         )
                     })
                 )})
                 }
-                <FormControl
-                    sx={{width: '100%'}}
-                >
-                    <Select
-                        value={displayedTeam}
-                        label="Team"
-                        displayEmpty
-                        variant="standard"
-                        sx={{
-                            padding: 1
-                        }}
-                        onChange={(e) => setDisplayedTeam(parseInt(e.target.value))}
+                <Box flexGrow={1} width='100%'>
+                    <FormControl
+                        sx={{width: '100%', zIndex: 0}}
                     >
-                        {Array.from({length: leagueSize}, (_, i) => i + 1).map((s) => {
-                                return (
-                                    <MenuItem key={s} value={s}>Team {s}</MenuItem>
-                                )
-                            })
-                        }
-                    </Select>
-                </FormControl>
-            </Paper>
+                        <Select
+                            value={displayedTeam}
+                            label="Team"
+                            displayEmpty
+                            variant="standard"
+                            sx={{
+                                padding: 1
+                            }}
+                            onChange={(e) => setDisplayedTeam(parseInt(e.target.value))}
+                        >
+                            {Array.from({length: leagueSize}, (_, i) => i + 1).map((s) => {
+                                    return (
+                                        <MenuItem key={s} value={s}>Team {s}</MenuItem>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </FormControl>
+                </Box>
+            </Box>
         )
     };
 
@@ -112,7 +127,14 @@ function Mock() {
         <Container maxWidth='100vw' style={styles.mainContainer}>
             {/* Header */}
             <Paper style={styles.header}>
-                <Typography variant="h3" fontWeight={700} color='primary' style={{width: '100%'}}>Minute Mock</Typography>
+                <Typography 
+                    variant="h4" 
+                    fontWeight={700} 
+                    color='primary' 
+                    style={{width: '100%'}}
+                >
+                    Minute Mock
+                </Typography>
                 <Container style={styles.headerOptions}>
                     <Link to="/mock/home/">
                         <IconButton color='primary'>
@@ -153,26 +175,46 @@ function Mock() {
                 })}
             </Container>
             {/* End Display Queue Position/Round */}
-            <Grid container spacing={0}>
-                <Grid item xs={3}>
+            {/* <Grid container spacing={0}>
+                <Grid item xs={4}>
                     {renderTeam()}
                 </Grid>
                 <Grid item xs={6}>
-                    <TableContainer component={Paper}>
-                        <Table size="small" aria-label="a dense table">
-                            <TableHead>
-                            <TableRow>
-                                <TableCell>Dessert (100g serving)</TableCell>
-                                <TableCell align="right">Calories</TableCell>
-                                <TableCell align="right">Fat&nbsp;(g)</TableCell>
-                                <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-                                <TableCell align="right">Protein&nbsp;(g)</TableCell>
-                            </TableRow>
-                            </TableHead>
-                        </Table>
-                    </TableContainer>
+                    
                 </Grid>
-            </Grid>
+            </Grid> */}
+            <TabContext value={tabValue}>
+            {isWideScreen ? (
+                <Grid container spacing={0}>
+                    <Grid item xs={4}>
+                        {renderTeam()}
+                    </Grid>
+                    <Grid item xs={6}>
+                        
+                    </Grid>
+                </Grid>
+            ) : (
+                <Box>
+                    <Box 
+                        position='fixed' 
+                        bottom={0}
+                        left={0}
+                        width='100%' 
+                        component={Paper}
+                        zIndex={1}
+                    >
+                        <Tabs value={tabValue} onChange={(event, value) => setTabValue(value)} variant='fullWidth'>
+                            <Tab label="Teams" value="Teams" />
+                            <Tab label="Players" value="Players" />
+                            <Tab label="Favorites" value="Favorites" />
+                        </Tabs>
+                    </Box>
+                    <TabPanel value="Teams" style={styles.tabPanels}>{renderTeam()}</TabPanel>
+                    <TabPanel value="Players" style={styles.tabPanels}>Content for Tab 2</TabPanel>
+                    <TabPanel value="Favorites" style={styles.tabPanels}>Content for Tab 3</TabPanel>
+                </Box>
+            )}
+            </TabContext>
         </Container>
     )
 };
@@ -247,13 +289,18 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'start'
+        alignItems: 'start',
+        width: '100%'
     },
     teamPlayerContainer: {
         padding: 0
     },
     teamPlayer: {
         padding: 8
+    },
+    tabPanels: {
+        margin: 0,
+        padding: 0
     }
 }
 
