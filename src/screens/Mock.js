@@ -8,7 +8,7 @@ import ding from '../assets/news-ting-6832.mp3';
 import { useDebugValue, useEffect, useState, useRef } from "react";
 import Favorites from "../components/Favorites";
 import { Link, useLocation } from "react-router-dom";
-import { AiFillHome, AiFillPlayCircle } from "react-icons/ai";
+import { AiFillHome, AiFillPlayCircle, AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { BsFillPersonFill } from "react-icons/bs";
 import { 
     Container, Paper, Grid, 
@@ -144,25 +144,32 @@ function Mock() {
 
     // Init Players by league type
     const [allPlayers, setAllPlayers] = useState(playersObj[leagueType]);
+    const [selectedPlayer, setSelectedPlayer] = useState(allPlayers[0]);
 
     const renderPlayerCard = () => {
         return (
             <Box 
-                style={styles.teamPlayerPaper}
-                display="flex"
-                flexDirection="column"
+                style={styles.playerCardContainer}
                 minHeight="25vh"
                 sx={{
-                    width: isWideScreen ? '100%' : '100vw',
-                    pb: isWideScreen ? 0 : '48px',
-                    pt: '2px'
+                    width: isWideScreen ? '100%' : '100vw'
                 }}
+                component={Paper}
             >
-                <Box
-                    flexGrow={1}
-                    p={2}
-                >
-                    <BsFillPersonFill size={80} />
+                <Box>
+                    <Box>
+                        <BsFillPersonFill size={120} />
+                    </Box>
+                </Box>
+                <Box>
+                    <IconButton color='secondary'>
+                        <AiOutlineStar />
+                    </IconButton>
+                    <Button variant="outlined" color="secondary">Draft</Button>
+                    <Box>
+                        <Typography>{selectedPlayer.name}</Typography>
+                        <Typography>2022 Points: {selectedPlayer.lastSeasonPoints}</Typography>
+                    </Box>
                 </Box>
             </Box>
         )
@@ -341,7 +348,14 @@ const styles = {
     tabPanels: {
         margin: 0,
         padding: 0
-    }
+    },
+    playerCardContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20
+    },
 }
 
 export default Mock;
