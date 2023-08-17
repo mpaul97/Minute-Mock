@@ -9,6 +9,7 @@ import { useDebugValue, useEffect, useState, useRef } from "react";
 import Favorites from "../components/Favorites";
 import { Link, useLocation } from "react-router-dom";
 import { AiFillHome, AiFillPlayCircle } from "react-icons/ai";
+import { BsFillPersonFill } from "react-icons/bs";
 import { 
     Container, Paper, Grid, 
     Typography, Chip, Button, 
@@ -26,6 +27,15 @@ import TeamObj from '../models/TeamObj';
 import Teams from "../models/Teams";
 
 const helper = new Helper();
+
+const playersObj = {
+    'Standard': JSON.parse(JSON.stringify(playersStd)),
+    'PPR': JSON.parse(JSON.stringify(playersPpr)),
+    'Half-PPR': JSON.parse(JSON.stringify(playersHalf))
+};
+
+// overallRanking, name, team, position, projections,
+// lastSeasonPoints, positionRanking, flexRanking
 
 function Mock() {
     const isWideScreen = useMediaQuery('(min-width: 800px)');
@@ -73,7 +83,11 @@ function Mock() {
                 flexDirection="column"
                 minHeight="80vh"
                 component={Paper}
-                // mb="36px"
+                sx={{
+                    width: isWideScreen ? '100%' : '100vw',
+                    pb: isWideScreen ? 0 : '48px',
+                    pt: '2px'
+                }}
             >
                 {Object.keys(allTeams[displayedTeam]).map((position) => {
                     return ((allTeams[displayedTeam][position]).map((player, index) => {
@@ -86,7 +100,12 @@ function Mock() {
                                 <Typography 
                                     color='primary'
                                     key={position + '_' + player.name + '_' + index}
-                                    style={styles.teamPlayer}
+                                    style={{
+                                        padding: 6,
+                                        paddingBottom: isWideScreen ? 8 : 5,
+                                        paddingTop: isWideScreen ? 8 : 6,
+                                        fontSize: '0.9rem'
+                                    }}
                                 >
                                     {position}: {player.name}
                                 </Typography>
@@ -102,11 +121,11 @@ function Mock() {
                     >
                         <Select
                             value={displayedTeam}
-                            label="Team"
                             displayEmpty
                             variant="standard"
                             sx={{
-                                padding: 1
+                                padding: 1,
+                                fontSize: '0.9rem'
                             }}
                             onChange={(e) => setDisplayedTeam(parseInt(e.target.value))}
                         >
@@ -123,66 +142,105 @@ function Mock() {
         )
     };
 
+    // Init Players by league type
+    const [allPlayers, setAllPlayers] = useState(playersObj[leagueType]);
+
+    const renderPlayerCard = () => {
+        return (
+            <Box 
+                style={styles.teamPlayerPaper}
+                display="flex"
+                flexDirection="column"
+                minHeight="25vh"
+                sx={{
+                    width: isWideScreen ? '100%' : '100vw',
+                    pb: isWideScreen ? 0 : '48px',
+                    pt: '2px'
+                }}
+            >
+                <Box
+                    flexGrow={1}
+                    p={2}
+                >
+                    <BsFillPersonFill size={80} />
+                </Box>
+            </Box>
+        )
+    };
+
     return (
         <Container maxWidth='100vw' style={styles.mainContainer}>
-            {/* Header */}
-            <Paper style={styles.header}>
-                <Typography 
-                    variant="h4" 
-                    fontWeight={700} 
-                    color='primary' 
-                    style={{width: '100%'}}
-                >
-                    Minute Mock
-                </Typography>
-                <Container style={styles.headerOptions}>
-                    <Link to="/mock/home/">
+            <Box
+                maxWidth="100%"
+                display="flex"
+                flexDirection="column"
+                minHeight="20vh"
+            >
+                {/* Header */}
+                <Box component={Paper} flexGrow={1} style={styles.header}>
+                    <Typography 
+                        variant="h4" 
+                        fontWeight={700} 
+                        color='primary' 
+                        style={{width: '100%'}}
+                        fontSize='1.5rem'
+                    >
+                        Minute Mock
+                    </Typography>
+                    <Container style={styles.headerOptions}>
+                        <Link to="/mock/home/">
+                            <IconButton color='primary'>
+                                <AiFillHome size={22}/>
+                            </IconButton>
+                        </Link>
                         <IconButton color='primary'>
-                            <AiFillHome size={24}/>
+                            <AiFillPlayCircle size={22}/>
                         </IconButton>
-                    </Link>
-                    <IconButton color='primary'>
-                        <AiFillPlayCircle size={24}/>
-                    </IconButton>
-                    <Chip color='primary' label="0:00" style={{fontSize: 16}}></Chip>
-                </Container>
-            </Paper>
-            {/* End Header */}
-            {/* Draft Info Status */}
-            <Container maxWidth={false} style={styles.draftInfoContainer}>
-                <Typography variant="h6" color='primary' fontWeight={500}>{displayInfo}</Typography>
-            </Container>
-            {/* End Draft Info Status */}
-            {/* Display Queue Position/Round */}
-            <Container maxWidth={false} style={styles.queueContainer}>
-                {queueArr.map((x) => {
-                    const isRound = ((typeof(x.queueVal) === 'string') && (x.queueVal.includes('Round')));
-                    const isUserPosition = x.queueVal === queuePosition;
-                    return (
-                        <Chip 
-                            color={isRound ? 'primary' : 'secondary'}
-                            label={x.queueVal} 
-                            style={
-                                isRound ? styles.roundQueueObject : 
-                                isUserPosition ? styles.userQueueObject :
-                                styles.queueObject
-                            }
-                            key={x.round + '_' + x.queueVal}
-                            variant={isUserPosition ? "filled" : "outlined"}
-                        >
-                        </Chip>
-                    )
-                })}
-            </Container>
+                        <Chip color='primary' label="0:00" style={{fontSize: '0.8rem'}}></Chip>
+                    </Container>
+                </Box>
+                {/* End Header */}
+                {/* Draft Info Status */}
+                <Box 
+                    maxWidth="100vw"
+                    style={styles.draftInfoContainer}
+                    flexGrow={1}
+                    minHeight='5vh'
+                >
+                    <Typography 
+                        variant="h6" 
+                        color='primary' 
+                        fontWeight={500}
+                        fontSize='0.9rem'
+                    >
+                        {displayInfo}
+                    </Typography>
+                </Box>
+                {/* End Draft Info Status */}
+                {/* Display Queue Position/Round */}
+                <Box 
+                    maxWidth="100vw" 
+                    style={styles.queueContainer}
+                    flexGrow={1}
+                    maxHeight="5vh"
+                >
+                    {queueArr.map((x) => {
+                        const isRound = ((typeof(x.queueVal) === 'string') && (x.queueVal.includes('Round')));
+                        const isUserPosition = x.queueVal === queuePosition;
+                        return (
+                            <Chip 
+                                color={isRound ? 'primary' : 'secondary'}
+                                label={x.queueVal} 
+                                style={styles.queueObject}
+                                key={x.round + '_' + x.queueVal}
+                                variant={isUserPosition ? "filled" : "outlined"}
+                            >
+                            </Chip>
+                        )
+                    })}
+                </Box>
+            </Box>
             {/* End Display Queue Position/Round */}
-            {/* <Grid container spacing={0}>
-                <Grid item xs={4}>
-                    {renderTeam()}
-                </Grid>
-                <Grid item xs={6}>
-                    
-                </Grid>
-            </Grid> */}
             <TabContext value={tabValue}>
             {isWideScreen ? (
                 <Grid container spacing={0}>
@@ -190,7 +248,7 @@ function Mock() {
                         {renderTeam()}
                     </Grid>
                     <Grid item xs={6}>
-                        
+                        {renderPlayerCard()}
                     </Grid>
                 </Grid>
             ) : (
@@ -203,14 +261,22 @@ function Mock() {
                         component={Paper}
                         zIndex={1}
                     >
-                        <Tabs value={tabValue} onChange={(event, value) => setTabValue(value)} variant='fullWidth'>
+                        <Tabs 
+                            value={tabValue} 
+                            onChange={(event, value) => setTabValue(value)} 
+                            variant='fullWidth'
+                        >
                             <Tab label="Teams" value="Teams" />
                             <Tab label="Players" value="Players" />
                             <Tab label="Favorites" value="Favorites" />
                         </Tabs>
                     </Box>
-                    <TabPanel value="Teams" style={styles.tabPanels}>{renderTeam()}</TabPanel>
-                    <TabPanel value="Players" style={styles.tabPanels}>Content for Tab 2</TabPanel>
+                    <TabPanel value="Teams" style={styles.tabPanels}>
+                        {renderTeam()}
+                    </TabPanel>
+                    <TabPanel value="Players" style={styles.tabPanels}>
+                        {renderPlayerCard()}
+                    </TabPanel>
                     <TabPanel value="Favorites" style={styles.tabPanels}>Content for Tab 3</TabPanel>
                 </Box>
             )}
@@ -230,6 +296,7 @@ const styles = {
     header: {
         display: 'flex',
         justifyContent: 'space-between',
+        alignItems: 'center',
         width: '100%',
         padding: 15,
         paddingRight: 0
@@ -239,13 +306,12 @@ const styles = {
         flexDirection: 'row',
         justifyContent: 'end',
         alignItems: 'center',
-        gap: 5
+        gap: 2
     },
     draftInfoContainer: {
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
-        padding: 5
+        alignItems: 'center'
     },
     queueContainer: {
         display: 'flex',
@@ -258,45 +324,19 @@ const styles = {
         padding: 0
     },
     queueObject: {
-        fontSize: 16, 
+        fontSize: 14, 
         borderRadius: 0,
-        padding: 5,
-        paddingTop: 20,
-        paddingBottom: 20,
         fontWeight: 600,
-        marginRight: 5
-    },
-    roundQueueObject: {
-        fontSize: 16, 
-        borderRadius: 0,
-        padding: 5,
-        paddingTop: 20,
-        paddingBottom: 20,
-        fontWeight: 700,
-        marginRight: 5
-    },
-    userQueueObject: {
-        fontSize: 16, 
-        borderRadius: 0,
-        border: '1px solid #ffc400',
-        padding: 5,
-        paddingTop: 20,
-        paddingBottom: 20,
-        fontWeight: 700,
         marginRight: 5
     },
     teamPlayerPaper: {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'start',
-        width: '100%'
+        alignItems: 'start'
     },
     teamPlayerContainer: {
-        padding: 0
-    },
-    teamPlayer: {
-        padding: 8
+        paddingTop: 2
     },
     tabPanels: {
         margin: 0,

@@ -94,7 +94,7 @@ const Testing = () => {
             </Grid>
         </Grid>
         ) : (
-            <Box>
+            <Box pb={5}>
                 <Box position='fixed' bottom={0} width='100%' component={Paper}>
                     <Tabs value={value} onChange={handleChange} centered variant='fullWidth'>
                         <Tab label="Tab 1" value="0" />
