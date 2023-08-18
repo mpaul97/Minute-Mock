@@ -152,6 +152,22 @@ function Mock() {
     const [allPlayers, setAllPlayers] = useState(playersObj[leagueType]);
     const [selectedPlayer, setSelectedPlayer] = useState(allPlayers[0]);
     const [tableFilterValue, setTableFilterValue] = useState(filterOptions[0]);
+    const [filteredPlayers, setFilteredPlayers] = useState(allPlayers);
+
+    const filter_players = (filterVal) => {
+        if (filterVal === 'All') {
+            setFilteredPlayers(allPlayers);
+        } else if (filterVal === 'Flex') {
+            setFilteredPlayers(allPlayers.filter(x => ['RB', 'WR', 'TE'].includes(x.position)));
+        } else {
+            setFilteredPlayers(allPlayers.filter(x => x.position == filterVal))
+        };
+    };
+
+    const handleSearch = (event) => {
+        setTableFilterValue('All');
+        setFilteredPlayers(allPlayers.filter(x => (x.name.toLowerCase()).includes(event.target.value)));
+    };
 
     const renderPlayerCard = () => {
         return (
@@ -171,8 +187,8 @@ function Mock() {
                     alignItems="start"
                 >
                     <Box>
-                        <Typography color="primary" variant="h5" fontWeight={700}>{selectedPlayer.name}</Typography>
-                        <Typography color="secondary" variant="p">2022 Points: {selectedPlayer.lastSeasonPoints}</Typography>
+                        <Typography fontSize={20} color="primary" variant="h5" fontWeight={700}>{selectedPlayer.name}</Typography>
+                        <Typography fontSize={14} color="secondary" variant="p">2022 Points: {selectedPlayer.lastSeasonPoints}</Typography>
                     </Box>
                 </Box>
                 <Box  
@@ -182,19 +198,33 @@ function Mock() {
                     alignItems="end"
                 >
                     <Box>
-                        <IconButton color='secondary'>
-                            <AiOutlineStar />
+                        <IconButton 
+                            color='secondary' 
+                            onClick={() => setFavorites([...favorites, selectedPlayer])}
+                            disabled={(favorites.filter(x => x.name === selectedPlayer.name).length === 1)}
+                        >
+                            {(favorites.filter(x => x.name === selectedPlayer.name).length === 0) ? 
+                                <AiOutlineStar /> :
+                                <AiFillStar />
+                            }
                         </IconButton>
                         <Button variant="outlined" color="secondary">Draft</Button>
                     </Box>
                     <Paper
                         component="form"
-                        sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}
+                        sx={{ 
+                            p: '2px 4px', 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            maxWidth: "50vw"
+                        }}
                     >
                         <InputBase
                             sx={{ ml: 1, flex: 1, fontSize: 14 }}
                             placeholder="Search..."
                             inputProps={{ 'aria-label': 'search google maps' }}
+                            autoComplete="true"
+                            onChange={(event) => handleSearch(event)}
                         />
                         <IconButton sx={{ p: '5px' }}>
                             <SearchIcon />
@@ -223,12 +253,13 @@ function Mock() {
                         component={Paper}
                         sx={{borderRadius: 0}}
                     >
-                        {filterOptions.map(option => {
+                        {filterOptions.map(filterVal => {
                             return (
                                 <Tab 
-                                    key={option} 
-                                    label={option} 
-                                    value={option} 
+                                    key={filterVal} 
+                                    label={filterVal} 
+                                    value={filterVal}
+                                    onClick={() => filter_players(filterVal)}
                                 />
                             )
                         })}
@@ -250,7 +281,7 @@ function Mock() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                        {allPlayers.map((row) => (
+                        {filteredPlayers.map((row) => (
                             <TableRow
                                 key={row.name}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
@@ -275,7 +306,7 @@ function Mock() {
     };
 
     // favorites
-    const [favorites, setFavorites] = useState([allPlayers[0]]);
+    const [favorites, setFavorites] = useState([]);
 
     const renderFavorites = () => {
         return (
@@ -283,50 +314,66 @@ function Mock() {
                 // style={}
                 display="flex"
                 flexDirection="column"
-                minHeight="80.2vh"
+                minWidth={isWideScreen ? "100%" : "100vw"}
+                minHeight={isWideScreen ? "80.2vh" : "65vh"}
                 sx={{
-                    pb: isWideScreen ? 0 : '48px'
+                    pb: isWideScreen ? 0 : '47px'
                 }}
             >
                 <Typography 
                     variant="h6" 
                     color="secondary"
-                    sx={{p: 1, borderRadius: 0}}
+                    position="fixed"
+                    sx={{
+                        p: 1,
+                        pl: 2.25,
+                        borderRadius: 0,
+                        width: '100%',
+                        zIndex: 1
+                    }}
                     component={Paper}
                 >
                     Favorites
                 </Typography>
                 <Divider flexItem />
-                {favorites.map(player => {
-                    return (
-                        <Box 
-                                // style={}
-                                flexGrow={1}
-                                width='100%'
-                                key={player.name}
-                            >
-                                <Chip
-                                    variant="outlined"
-                                    color='primary'
-                                    label={player.name}
-                                    onDelete={() => setFavorites()}
-                                    style={{
-                                        padding: 6,
-                                        paddingBottom: isWideScreen ? 8 : 5,
-                                        paddingTop: isWideScreen ? 8 : 6,
-                                        fontSize: '0.9rem',
-                                        border: 0,
-                                        borderRadius: 0,
-                                        width: '100%',
-                                        display: 'flex',
-                                        justifyContent: 'space-between'
-                                    }}
+                <Box 
+                    display="flex"
+                    flexDirection="column"
+                    overflow="auto"
+                    maxHeight={isWideScreen ? "calc(80vh - 48px)" : "calc(60vh - 48px)"}
+                    sx={{mt: '48px', overflowX: 'hidden'}}
+                >
+                    {favorites.map(player => {
+                        return (
+                            <Box 
+                                    // style={}
+                                    width='100%'
+                                    key={player.name}
                                 >
-                                </Chip>
-                                <Divider />
-                            </Box>
-                    )
-                })}
+                                    <Chip
+                                        variant="outlined"
+                                        color='primary'
+                                        label={player.name}
+                                        onClick={() => setSelectedPlayer(player)}
+                                        onDelete={() => setFavorites(favorites.filter(x => x.name !== player.name))}
+                                        style={{
+                                            padding: 6,
+                                            paddingBottom: isWideScreen ? 8 : 5,
+                                            paddingTop: isWideScreen ? 8 : 6,
+                                            fontSize: '0.9rem',
+                                            border: 0,
+                                            borderRadius: 0,
+                                            width: '100%',
+                                            display: 'flex',
+                                            justifyContent: 'space-between'
+                                        }}
+                                    >
+                                    </Chip>
+                                    <Divider />
+                                </Box>
+                        )
+                    })}
+                </Box>  
             </Box>
         )
     };
@@ -457,7 +504,9 @@ function Mock() {
                         {renderTable()}
                     </TabPanel>
                     <TabPanel value="Favorites" style={styles.tabPanels}>
-                        Content for Tab 3
+                        {renderPlayerCard()}
+                        <Divider flexItem />
+                        {renderFavorites()}
                     </TabPanel>
                 </Box>
             )}
@@ -480,7 +529,8 @@ const styles = {
         alignItems: 'center',
         width: '100%',
         padding: 15,
-        paddingRight: 0
+        paddingRight: 0,
+        borderRadius: 0
     },
     headerOptions: {
         display: 'flex',
