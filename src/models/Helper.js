@@ -24,6 +24,9 @@ class Helper {
         }
         return arr;
     }
+    round(value) {
+        return Math.round(value * 100) / 100;
+    }
 };
 
 export default Helper;

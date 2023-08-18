@@ -10,6 +10,7 @@ import Favorites from "../components/Favorites";
 import { Link, useLocation } from "react-router-dom";
 import { AiFillHome, AiFillPlayCircle, AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { BsFillPersonFill } from "react-icons/bs";
+import SearchIcon from '@mui/icons-material/Search';
 import { 
     Container, Paper, Grid, 
     Typography, Chip, Button, 
@@ -18,9 +19,12 @@ import {
     Box, TableContainer, Table,
     TableHead, TableRow, TableCell,
     TableBody, useMediaQuery,
-    Tabs, Tab
+    Tabs, Tab, TextField,
+    InputAdornment, InputBase, tableCellClasses,
+    BottomNavigation
 } from "@mui/material";
 import { TabPanel, TabContext } from '@mui/lab';
+import { styled } from '@mui/material/styles';
 import { blue, amber } from "@mui/material/colors";
 import Helper from '../models/Helper';
 import TeamObj from '../models/TeamObj';
@@ -37,8 +41,11 @@ const playersObj = {
 // overallRanking, name, team, position, projections,
 // lastSeasonPoints, positionRanking, flexRanking
 
+const filterOptions = ['All', 'QB', 'RB', 'WR', 'TE', 'Flex', 'K', 'DST'];
+
 function Mock() {
-    const isWideScreen = useMediaQuery('(min-width: 800px)');
+
+    const isWideScreen = useMediaQuery('(min-width: 850px)');
     const [tabValue, setTabValue] = useState('Teams');
 
     var leagueSize = 8;
@@ -71,6 +78,7 @@ function Mock() {
 
     const [displayInfo, setDisplayInfo] = useState("Click \"Start\" to begin");
 
+    // team
     const teams = new Teams(leagueSize, positionSizes);
     const [allTeams, setAllTeams] = useState(teams.initTeams());
     const [displayedTeam, setDisplayedTeam] = useState(queuePosition);
@@ -81,10 +89,8 @@ function Mock() {
                 style={styles.teamPlayerPaper}
                 display="flex"
                 flexDirection="column"
-                minHeight="80vh"
-                component={Paper}
+                minHeight="80.2vh"
                 sx={{
-                    width: isWideScreen ? '100%' : '100vw',
                     pb: isWideScreen ? 0 : '48px',
                     pt: '2px'
                 }}
@@ -96,10 +102,10 @@ function Mock() {
                                 style={styles.teamPlayerContainer}
                                 flexGrow={1}
                                 width='100%'
+                                key={position + '_' + player.name + '_' + index}
                             >
                                 <Typography 
                                     color='primary'
-                                    key={position + '_' + player.name + '_' + index}
                                     style={{
                                         padding: 6,
                                         paddingBottom: isWideScreen ? 8 : 5,
@@ -142,46 +148,199 @@ function Mock() {
         )
     };
 
-    // Init Players by league type
+    // table
     const [allPlayers, setAllPlayers] = useState(playersObj[leagueType]);
     const [selectedPlayer, setSelectedPlayer] = useState(allPlayers[0]);
+    const [tableFilterValue, setTableFilterValue] = useState(filterOptions[0]);
 
     const renderPlayerCard = () => {
         return (
             <Box 
                 style={styles.playerCardContainer}
-                minHeight="25vh"
+                minHeight="15vh"
+                minWidth={isWideScreen ? "100%" : "97vw"}
                 sx={{
-                    width: isWideScreen ? '100%' : '100vw'
+                    padding: 2
                 }}
-                component={Paper}
+                // component={Paper}
             >
-                <Box>
+                <Box
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="center"
+                    alignItems="start"
+                >
                     <Box>
-                        <BsFillPersonFill size={120} />
+                        <Typography color="primary" variant="h5" fontWeight={700}>{selectedPlayer.name}</Typography>
+                        <Typography color="secondary" variant="p">2022 Points: {selectedPlayer.lastSeasonPoints}</Typography>
                     </Box>
                 </Box>
-                <Box>
-                    <IconButton color='secondary'>
-                        <AiOutlineStar />
-                    </IconButton>
-                    <Button variant="outlined" color="secondary">Draft</Button>
+                <Box  
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="space-between"
+                    alignItems="end"
+                >
                     <Box>
-                        <Typography>{selectedPlayer.name}</Typography>
-                        <Typography>2022 Points: {selectedPlayer.lastSeasonPoints}</Typography>
+                        <IconButton color='secondary'>
+                            <AiOutlineStar />
+                        </IconButton>
+                        <Button variant="outlined" color="secondary">Draft</Button>
                     </Box>
+                    <Paper
+                        component="form"
+                        sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}
+                    >
+                        <InputBase
+                            sx={{ ml: 1, flex: 1, fontSize: 14 }}
+                            placeholder="Search..."
+                            inputProps={{ 'aria-label': 'search google maps' }}
+                        />
+                        <IconButton sx={{ p: '5px' }}>
+                            <SearchIcon />
+                        </IconButton>
+                    </Paper>
                 </Box>
             </Box>
         )
     };
 
+    const renderTable = () => {
+        return (
+            <Box>
+                <Box 
+                    maxWidth="100vw"
+                    zIndex={1}
+                >
+                    <Tabs 
+                        value={tableFilterValue} 
+                        onChange={(event, value) => setTableFilterValue(value)} 
+                        textColor="secondary"
+                        indicatorColor="secondary"
+                        variant="scrollable"
+                        scrollButtons
+                        allowScrollButtonsMobile
+                        component={Paper}
+                        sx={{borderRadius: 0}}
+                    >
+                        {filterOptions.map(option => {
+                            return (
+                                <Tab 
+                                    key={option} 
+                                    label={option} 
+                                    value={option} 
+                                />
+                            )
+                        })}
+                    </Tabs>
+                    <Divider />
+                </Box>
+                <TableContainer 
+                    sx={{ maxHeight: 'calc(65vh - 48px)', maxWidth: '100vw' }}
+                >
+                    <Table stickyHeader size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Rank</TableCell>
+                                <TableCell align="left">Name</TableCell>
+                                <TableCell align="left">Team</TableCell>
+                                <TableCell align="left">Position</TableCell>
+                                <TableCell align="left">Projections</TableCell>
+                                <TableCell align="left">2022 Points</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                        {allPlayers.map((row) => (
+                            <TableRow
+                                key={row.name}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
+                                hover
+                                onClick={() => setSelectedPlayer(row)}
+                            >
+                                <TableCell component="th" scope="row">
+                                    {row.overallRanking}
+                                </TableCell>
+                                <TableCell align="left">{row.name}</TableCell>
+                                <TableCell align="left">{row.team}</TableCell>
+                                <TableCell align="left">{row.position}</TableCell>
+                                <TableCell align="left">{helper.round(row.projections)}</TableCell>
+                                <TableCell align="left">{row.lastSeasonPoints}</TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
+        )
+    };
+
+    // favorites
+    const [favorites, setFavorites] = useState([allPlayers[0]]);
+
+    const renderFavorites = () => {
+        return (
+            <Box 
+                // style={}
+                display="flex"
+                flexDirection="column"
+                minHeight="80.2vh"
+                sx={{
+                    pb: isWideScreen ? 0 : '48px'
+                }}
+            >
+                <Typography 
+                    variant="h6" 
+                    color="secondary"
+                    sx={{p: 1, borderRadius: 0}}
+                    component={Paper}
+                >
+                    Favorites
+                </Typography>
+                <Divider flexItem />
+                {favorites.map(player => {
+                    return (
+                        <Box 
+                                // style={}
+                                flexGrow={1}
+                                width='100%'
+                                key={player.name}
+                            >
+                                <Chip
+                                    variant="outlined"
+                                    color='primary'
+                                    label={player.name}
+                                    onDelete={() => setFavorites()}
+                                    style={{
+                                        padding: 6,
+                                        paddingBottom: isWideScreen ? 8 : 5,
+                                        paddingTop: isWideScreen ? 8 : 6,
+                                        fontSize: '0.9rem',
+                                        border: 0,
+                                        borderRadius: 0,
+                                        width: '100%',
+                                        display: 'flex',
+                                        justifyContent: 'space-between'
+                                    }}
+                                >
+                                </Chip>
+                                <Divider />
+                            </Box>
+                    )
+                })}
+            </Box>
+        )
+    };
+
     return (
-        <Container maxWidth='100vw' style={styles.mainContainer}>
+        <Container 
+            maxWidth={false} 
+            style={styles.mainContainer}
+        >
             <Box
                 maxWidth="100%"
                 display="flex"
                 flexDirection="column"
-                minHeight="20vh"
+                minHeight="19.7vh"
             >
                 {/* Header */}
                 <Box component={Paper} flexGrow={1} style={styles.header}>
@@ -209,7 +368,7 @@ function Mock() {
                 {/* End Header */}
                 {/* Draft Info Status */}
                 <Box 
-                    maxWidth="100vw"
+                    maxWidth="100%"
                     style={styles.draftInfoContainer}
                     flexGrow={1}
                     minHeight='5vh'
@@ -226,10 +385,9 @@ function Mock() {
                 {/* End Draft Info Status */}
                 {/* Display Queue Position/Round */}
                 <Box 
-                    maxWidth="100vw" 
+                    maxWidth="100%" 
                     style={styles.queueContainer}
                     flexGrow={1}
-                    maxHeight="5vh"
                 >
                     {queueArr.map((x) => {
                         const isRound = ((typeof(x.queueVal) === 'string') && (x.queueVal.includes('Round')));
@@ -250,12 +408,22 @@ function Mock() {
             {/* End Display Queue Position/Round */}
             <TabContext value={tabValue}>
             {isWideScreen ? (
-                <Grid container spacing={0}>
-                    <Grid item xs={4}>
+                <Grid container spacing={0} wrap="nowrap">
+                    <Grid item xs={3}>
+                        <Divider flexItem />
                         {renderTeam()}
                     </Grid>
+                    <Divider orientation="vertical" flexItem />
                     <Grid item xs={6}>
+                        <Divider flexItem />
                         {renderPlayerCard()}
+                        <Divider flexItem />
+                        {renderTable()}
+                    </Grid>
+                    <Divider orientation="vertical" flexItem />
+                    <Grid item xs={3}>
+                        <Divider flexItem />
+                        {renderFavorites()}
                     </Grid>
                 </Grid>
             ) : (
@@ -279,12 +447,18 @@ function Mock() {
                         </Tabs>
                     </Box>
                     <TabPanel value="Teams" style={styles.tabPanels}>
+                        {renderPlayerCard()}
+                        <Divider flexItem />
                         {renderTeam()}
                     </TabPanel>
                     <TabPanel value="Players" style={styles.tabPanels}>
                         {renderPlayerCard()}
+                        <Divider flexItem />
+                        {renderTable()}
                     </TabPanel>
-                    <TabPanel value="Favorites" style={styles.tabPanels}>Content for Tab 3</TabPanel>
+                    <TabPanel value="Favorites" style={styles.tabPanels}>
+                        Content for Tab 3
+                    </TabPanel>
                 </Box>
             )}
             </TabContext>
@@ -352,9 +526,7 @@ const styles = {
     playerCardContainer: {
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 20
+        justifyContent: 'space-between'
     },
 }
 
