@@ -11,7 +11,7 @@ import {
     Button, IconButton, InputLabel, 
     MenuItem, FormControl, Divider,
     Autocomplete, TextField, List,
-    Chip,
+    Chip, Box,
 } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Helper from '../models/Helper';
@@ -78,7 +78,7 @@ function Home() {
             <Container
                 style={styles.optionsContainer}
             >
-                <Typography variant='h6' fontWeight={600} color="primary">{title}</Typography>
+                <Typography variant='h6' fontWeight={600} color="secondary">{title}</Typography>
                 <Container
                     style={styles.innerOptionsContainer}
                 >
@@ -99,13 +99,11 @@ function Home() {
     };
 
     // Init Players by league type
-    const [allPlayers, setAllPlayers] = useState(() => {
-        return playerData[type];
-    });
+    const [allPlayers, setAllPlayers] = useState(playerData[type]);
 
     // set type and update playerData
-    const setTypeAndPlayers = (type) => {
-        setType(type);
+    const setTypeAndPlayers = (inputType) => {
+        setType(inputType);
         setAllPlayers(playerData[type]);
     }
 
@@ -133,7 +131,6 @@ function Home() {
     // update number of total rounds
     useEffect(() => {
         setTotalRounds(helper.sum(Object.keys(players).map(key => players[key].variable)));
-        console.log(totalRounds)
     })
 
     return (
@@ -141,14 +138,22 @@ function Home() {
             maxWidth="100vw" 
             style={styles.mainContainer}
         >
-            <Paper 
-                elevation={10}
+            <Box 
                 sx={styles.paperOptions}
             >
-                <Typography variant='h4' fontWeight={700} color="primary">Minute Mock</Typography>
-                <IconButton color='primary' onClick={() => setInfoModalIsOpen(true)}>
-                    <AiFillInfoCircle size={20}/>
-                </IconButton>
+                <Box
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    width="100%"
+                    p={2}
+                    component={Paper}
+                >
+                    <Typography variant='h4' fontSize='1.7rem' fontWeight={700} color="primary">Minute Mock</Typography>
+                    <IconButton color='primary' onClick={() => setInfoModalIsOpen(true)}>
+                        <AiFillInfoCircle size={20}/>
+                    </IconButton>
+                </Box>  
                 {/* Info Modal */}
                 <Modal
                     isOpen={infoModalIsOpen}
@@ -180,14 +185,17 @@ function Home() {
                 {/* End Info Modal */}
                 {/* Main Options */}
                 {renderOption('League Size', sizes, size, setSizeAndQueue)}
+                <Divider flexItem/>
                 {renderOption('Draft Position', Array.from({length: size}, (_, i) => i + 1), queue, setQueue)}
+                <Divider flexItem/>
                 {renderOption('League Type', types, type, setTypeAndPlayers)}
+                <Divider flexItem/>
                 {/* End Main Options */}
                 {/* Render player (select sizes for each position) */}
                 <Container
                     style={styles.optionsContainer}
                 >
-                    <Typography variant='h6' fontWeight={600} color="primary">Players</Typography>
+                    <Typography variant='h6' fontWeight={600} color="secondary">Players</Typography>
                     <Container style={styles.innerOptionsContainer}>
                         {Object.keys(players).map((x) => {
                             return (
@@ -214,14 +222,22 @@ function Home() {
                         })}
                     </Container>
                 </Container>
+                <Divider flexItem/>
                 {/* End Render Players */}
                 {renderOption('Clock Speed', times, clock, setClock)}
+                <Divider flexItem/>
                 {/* Keepers */}
                 <Container
                     style={styles.optionsContainer}
                 >
-                    <Typography variant='h6' fontWeight={600} color="primary" style={{padding: 10}}>Keepers</Typography>
-                    <Button variant='outlined' onClick={() => setKeeperModalIsOpen(true)}>Add Keepers</Button>
+                    <Typography variant='h6' fontWeight={600} color="secondary" style={{padding: 10}}>Keepers</Typography>
+                    <Button 
+                        variant='outlined' 
+                        onClick={() => setKeeperModalIsOpen(true)}
+                        sx={{mb: 1}}
+                    >
+                        Add Keepers
+                    </Button>
                 </Container>
                 {/* End Keepers */}
                 {/* Keepers Modal */}
@@ -327,7 +343,7 @@ function Home() {
                     </Paper>
                 </Modal>
                 {/* End Keepers Modal */}
-                <Divider />
+                <Divider flexItem/>
                 {/* Submit to Mock */}
                 <Link
                     to='/mock/content'
@@ -352,7 +368,7 @@ function Home() {
                     </Button>
                 </Link>
                 {/* End Submit */}
-            </Paper>
+            </Box>
         </Container>
     )
 }
@@ -363,18 +379,17 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: '5%',
-        paddingBottom: '5%'
+        paddingTop: 1,
+        paddingBottom: 20
     },
     paperOptions: {
-        width: '80%', 
+        width: '100%', 
         height: 'fit-content',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 1,
-        padding: '5%'
+        borderRadius: 0
     },
     modalStyle: {
         content: {
@@ -405,7 +420,8 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        margin: 10
     },
     innerOptionsContainer: {
         display: 'flex',
