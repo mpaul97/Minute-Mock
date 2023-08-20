@@ -29,8 +29,10 @@ import { blue, amber } from "@mui/material/colors";
 import Helper from '../models/Helper';
 import TeamObj from '../models/TeamObj';
 import Teams from "../models/Teams";
+import Computer from "../models/Computer";
 
 const helper = new Helper();
+const computer = new Computer();
 
 const playersObj = {
     'Standard': JSON.parse(JSON.stringify(playersStd)),
@@ -42,6 +44,17 @@ const playersObj = {
 // lastSeasonPoints, positionRanking, flexRanking
 
 const filterOptions = ['All', 'QB', 'RB', 'WR', 'TE', 'Flex', 'K', 'DST'];
+
+const userTime = 30;
+const computerTimeOptions = {
+    'Instant': 0,
+    'Fast': 2,
+    'Medium': 5,
+    'Slow': 10
+};
+const audio = new Audio(ding);
+audio.loop = false;
+audio.volume = 0.4;
 
 function Mock() {
 
@@ -75,8 +88,9 @@ function Mock() {
 
     const totalPositionSize = helper.sum(numPositionSizes);
     const [queueArr, setQueueArr] = useState(helper.buildQueueArray(leagueSize, totalPositionSize));
+    const [simpleQueueArr, setSimpleQueueArr] = useState(queueArr.filter(x => typeof(x.queueVal) !== 'string').map(x => x.queueVal));
 
-    const [displayInfo, setDisplayInfo] = useState("Click \"Start\" to begin");
+    const [displayInfo, setDisplayInfo] = useState("");
 
     // team
     const teams = new Teams(leagueSize, positionSizes);
@@ -96,13 +110,13 @@ function Mock() {
                 }}
             >
                 {Object.keys(allTeams[displayedTeam]).map((position) => {
-                    return ((allTeams[displayedTeam][position]).map((player, index) => {
+                    return ((allTeams[displayedTeam][position]).map((name, index) => {
                         return (
                             <Box 
                                 style={styles.teamPlayerContainer}
                                 flexGrow={1}
                                 width='100%'
-                                key={position + '_' + player.name + '_' + index}
+                                key={position + '_' + name + '_' + index}
                             >
                                 <Typography 
                                     color='primary'
@@ -113,7 +127,7 @@ function Mock() {
                                         fontSize: '0.9rem'
                                     }}
                                 >
-                                    {position}: {player.name}
+                                    {position}: {name}
                                 </Typography>
                                 <Divider />
                             </Box>
@@ -378,6 +392,103 @@ function Mock() {
         )
     };
 
+    // DRAFT LOGIC
+    teams.addKeepers(allTeams[queuePosition], keepers, allPlayers);
+    const [allNeeds, setAllNeeds] = useState(teams.initNeeds());
+
+    const [startClicked, setStartClicked] = useState(false);
+    const [draftEnd, setDraftEnd] = useState(false);
+
+    const [computerTime, setComputerTime] = useState(computerTimeOptions[clock]);
+    const [timerNum, setTimerNum] = useState((queuePosition === 1) ? userTime : computerTime);
+
+    const [currDrafter, setCurrDrafter] = useState(1);
+    const [round, setRound] = useState(1);
+    const [queueIndex, setQueueIndex] = useState(0);
+
+    // GAME FUNCTIONS
+    const handleStart = () => {
+        setStartClicked(true);
+        setDisplayInfo("Draft started.");
+        if (queuePosition === 1) {
+            setDisplayInfo(displayInfo + "You're on the clock.");
+        }
+    };
+
+    const handleShiftQueue = () => {
+        let temp = queueArr;
+        let index = temp.findIndex(x => x.queueVal === currDrafter && x.round === round);
+        temp.splice(index, 1);
+        if (temp[0].queueVal.toString().includes('Round')) {
+            temp.shift();
+        }
+        setQueueArr(temp);
+    };
+
+    const handleComputerDraft = () => {
+        let needs = allNeeds[currDrafter];
+        let player = computer.getPlayer(needs, currDrafter, round, allPlayers);
+        let team = allTeams[currDrafter];
+        teams.addPlayer(team, player);
+        teams.updateNeeds(team, needs, player.position, round);
+        var displayString = "Team " + currDrafter.toString() + " selects " + player.position + " " + player.name + ". ";
+        if (simpleQueueArr[queueIndex + 1] !== queuePosition) {
+            setDisplayInfo(displayString);
+        } else {
+            setDisplayInfo(displayString + "You're on the clock.");
+        };
+        if (simpleQueueArr[queueIndex] === queuePosition) {
+            var userDisplayString = "You selected " + player.position + " " + player.name + ". ";
+            setDisplayInfo(userDisplayString);
+        };
+    };
+
+    // TIMER
+    useEffect(() => {
+        let timer = null;
+        if (startClicked) {
+            timer = setInterval(() => {
+                setTimerNum(timerNum - 1);
+            }, 1000);
+        };
+        return () => {
+            clearInterval(timer);
+        };
+    });
+
+    //MAIN GAME LOOP
+    useEffect(() => {
+        if (startClicked && !draftEnd) {
+            if (timerNum === -1) {
+                if (currDrafter !== queuePosition) {
+                    handleComputerDraft();
+                }
+                setCurrDrafter(simpleQueueArr[queueIndex + 1]);
+                setQueueIndex(queueIndex + 1);
+                if ((queueIndex + 1) !== simpleQueueArr.length) {
+                    handleShiftQueue(currDrafter, round);
+                    if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
+                        setRound(round + 1);
+                    }
+                    if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
+                        setTimerNum(computerTime);
+                    } else {
+                        audio.play();
+                        setTimerNum(userTime);
+                    }
+                } else { // draft end
+                    setDraftEnd(true);
+                    queueArr.shift();
+                    queueArr.shift();
+                }
+            }
+        }
+    });
+
+    useEffect(() => {
+        
+    }, []);
+
     return (
         <Container 
             maxWidth={false} 
@@ -406,10 +517,15 @@ function Mock() {
                                 <AiFillHome size={22}/>
                             </IconButton>
                         </Link>
-                        <IconButton color='primary'>
+                        <IconButton onClick={handleStart} color='primary'>
                             <AiFillPlayCircle size={22}/>
                         </IconButton>
-                        <Chip color='primary' label="0:00" style={{fontSize: '0.8rem'}}></Chip>
+                        <Chip 
+                            color='primary' 
+                            label={timerNum !== -1 ? helper.convertTime(timerNum) : '0:00'} 
+                            style={{fontSize: '0.8rem'}}
+                        >
+                        </Chip>
                     </Container>
                 </Box>
                 {/* End Header */}
@@ -420,14 +536,40 @@ function Mock() {
                     flexGrow={1}
                     minHeight='5vh'
                 >
-                    <Typography 
-                        variant="h6" 
-                        color='primary' 
-                        fontWeight={500}
-                        fontSize='0.9rem'
-                    >
-                        {displayInfo}
-                    </Typography>
+                    {displayInfo.length > 0 ?
+                        <Typography 
+                            variant="h6" 
+                            color='primary' 
+                            fontWeight={500}
+                            fontSize='0.9rem'
+                        >
+                            {displayInfo}
+                        </Typography>
+                        :
+                        <Box
+                            display="flex"
+                            flexDirection="row"
+                            alignItems="center"
+                        >
+                            <Typography 
+                                variant="h6" 
+                                color='primary' 
+                                fontWeight={500}
+                                fontSize='0.9rem'
+                            >
+                                Click 
+                            </Typography>
+                            <AiFillPlayCircle color="#2196f3" style={{marginLeft: 4, marginRight: 4}} />
+                            <Typography 
+                                variant="h6" 
+                                color='primary' 
+                                fontWeight={500}
+                                fontSize='0.9rem'
+                            >
+                                to begin. 
+                            </Typography>
+                        </Box>  
+                    }
                 </Box>
                 {/* End Draft Info Status */}
                 {/* Display Queue Position/Round */}

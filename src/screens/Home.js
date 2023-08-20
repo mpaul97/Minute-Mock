@@ -45,7 +45,7 @@ function Home() {
     const [kSize, setKSize] = useState(1);
     const [dstSize, setDstSize] = useState(1);
     const [benchSize, setBenchSize] = useState(7);
-    const players = {
+    const [players, setPlayers] = useState({
         'QB': {size: 2, variable: qbSize, setFunc: setQbSize},
         'RB': {size: 4, variable: rbSize, setFunc: setRbSize},
         'WR': {size: 4, variable: wrSize, setFunc: setWrSize},
@@ -54,7 +54,7 @@ function Home() {
         'K': {size: 2, variable: kSize, setFunc: setKSize},
         'DST': {size: 2, variable: dstSize, setFunc: setDstSize},
         'BEN': {size: 10, variable: benchSize, setFunc: setBenchSize},
-    }
+    })
 
     const [keeperSearchValue, setKeeperSearchValue] = useState(null);
     const [keepers, setKeepers] = useState([]);
@@ -131,7 +131,7 @@ function Home() {
     // update number of total rounds
     useEffect(() => {
         setTotalRounds(helper.sum(Object.keys(players).map(key => players[key].variable)));
-    })
+    }, [players])
 
     return (
         <Container 
