@@ -1,15 +1,10 @@
-import PlayerQueue from "../components/PlayerQueue";
-import Team from "../components/Team";
-import Player from "../components/Players";
 import playersStd from '../assets/jsonData_std.json';
 import playersPpr from '../assets/jsonData_ppr.json';
 import playersHalf from '../assets/jsonData_half.json';
 import ding from '../assets/news-ting-6832.mp3';
-import { useDebugValue, useEffect, useState, useRef } from "react";
-import Favorites from "../components/Favorites";
+import { useDebugValue, useEffect, useState, useRef, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AiFillHome, AiFillPlayCircle, AiFillStar, AiOutlineStar } from "react-icons/ai";
-import { BsFillPersonFill } from "react-icons/bs";
 import SearchIcon from '@mui/icons-material/Search';
 import { 
     Container, Paper, Grid, 
@@ -24,8 +19,10 @@ import {
     BottomNavigation
 } from "@mui/material";
 import { TabPanel, TabContext } from '@mui/lab';
-import { styled } from '@mui/material/styles';
-import { blue, amber } from "@mui/material/colors";
+import { 
+    DataGrid, GridColDef, GridValueGetterParams,
+    GridToolbarContainer, GridToolbarFilterButton, GridToolbar
+} from '@mui/x-data-grid';
 import Helper from '../models/Helper';
 import TeamObj from '../models/TeamObj';
 import Teams from "../models/Teams";
@@ -42,8 +39,6 @@ const playersObj = {
 
 // overallRanking, name, team, position, projections,
 // lastSeasonPoints, positionRanking, flexRanking
-
-const filterOptions = ['All', 'QB', 'RB', 'WR', 'TE', 'Flex', 'K', 'DST'];
 
 const userTime = 30;
 const computerTimeOptions = {
@@ -165,23 +160,6 @@ function Mock() {
     // table
     const [allPlayers, setAllPlayers] = useState(playersObj[leagueType]);
     const [selectedPlayer, setSelectedPlayer] = useState(allPlayers[0]);
-    const [tableFilterValue, setTableFilterValue] = useState(filterOptions[0]);
-    const [filteredPlayers, setFilteredPlayers] = useState(allPlayers);
-
-    const filter_players = (filterVal) => {
-        if (filterVal === 'All') {
-            setFilteredPlayers(allPlayers);
-        } else if (filterVal === 'Flex') {
-            setFilteredPlayers(allPlayers.filter(x => ['RB', 'WR', 'TE'].includes(x.position)));
-        } else {
-            setFilteredPlayers(allPlayers.filter(x => x.position == filterVal))
-        };
-    };
-
-    const handleSearch = (event) => {
-        setTableFilterValue('All');
-        setFilteredPlayers(allPlayers.filter(x => (x.name.toLowerCase()).includes(event.target.value)));
-    };
 
     const renderPlayerCard = () => {
         return (
@@ -192,7 +170,6 @@ function Mock() {
                 sx={{
                     padding: 2
                 }}
-                // component={Paper}
             >
                 <Box
                     display="flex"
@@ -202,7 +179,55 @@ function Mock() {
                 >
                     <Box>
                         <Typography fontSize={20} color="primary" variant="h5" fontWeight={700}>{selectedPlayer.name}</Typography>
-                        <Typography fontSize={14} color="secondary" variant="p">2022 Points: {selectedPlayer.lastSeasonPoints}</Typography>
+                        <Typography fontSize={14} fontWeight={600} color="secondary">{selectedPlayer.position}</Typography>
+                        <Box 
+                            display="flex" 
+                            flexDirection="row" 
+                            justifyContent="space-between"
+                            width={135}
+                            m={0}
+                            p={0}
+                        >
+                            <Typography 
+                                fontSize={14}
+                                fontWeight={600}
+                                color="primary" 
+                                variant="p"
+                            >
+                                Projections: 
+                            </Typography>
+                            <Typography 
+                                fontSize={14} 
+                                color="secondary"  
+                                variant="p"
+                            >
+                                {helper.round(selectedPlayer.projections)}
+                            </Typography>
+                        </Box>
+                        <Box 
+                            display="flex" 
+                            flexDirection="row" 
+                            justifyContent="space-between"
+                            width={135}
+                            m={0}
+                            p={0}
+                        >
+                            <Typography 
+                                fontSize={14}
+                                fontWeight={600}
+                                color="primary" 
+                                variant="p"
+                            >
+                                2022 Points: 
+                            </Typography>
+                            <Typography 
+                                fontSize={14} 
+                                color="secondary"  
+                                variant="p"
+                            >
+                                {selectedPlayer.lastSeasonPoints}
+                            </Typography>
+                        </Box>
                     </Box>
                 </Box>
                 <Box  
@@ -222,99 +247,69 @@ function Mock() {
                                 <AiFillStar />
                             }
                         </IconButton>
-                        <Button variant="outlined" color="secondary">Draft</Button>
+                        <Button 
+                            variant="outlined" 
+                            color="secondary"
+                            onClick={handleUserDraft}
+                            disabled={(currDrafter !== queuePosition)}
+                        >
+                            Draft
+                        </Button>
                     </Box>
-                    <Paper
-                        component="form"
-                        sx={{ 
-                            p: '2px 4px', 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            maxWidth: "50vw"
-                        }}
-                    >
-                        <InputBase
-                            sx={{ ml: 1, flex: 1, fontSize: 14 }}
-                            placeholder="Search..."
-                            inputProps={{ 'aria-label': 'search google maps' }}
-                            autoComplete="true"
-                            onChange={(event) => handleSearch(event)}
-                        />
-                        <IconButton sx={{ p: '5px' }}>
-                            <SearchIcon />
-                        </IconButton>
-                    </Paper>
                 </Box>
             </Box>
         )
     };
 
+    // DATA GRID
+    const columns = [
+        { field: 'id', headerName: 'Rank', flex: 1, minWidth: 100 },
+        { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
+        { field: 'position', headerName: 'Position', flex: 1, minWidth: 120 },
+        { field: 'team', headerName: 'Team' },
+        { field: 'projections', headerName: 'Projections' },
+        { field: 'lastSeasonPoints', headerName: '2022 Points' }
+    ];
+
     const renderTable = () => {
         return (
-            <Box>
-                <Box 
-                    maxWidth="100vw"
-                    zIndex={1}
-                >
-                    <Tabs 
-                        value={tableFilterValue} 
-                        onChange={(event, value) => setTableFilterValue(value)} 
-                        textColor="secondary"
-                        indicatorColor="secondary"
-                        variant="scrollable"
-                        scrollButtons
-                        allowScrollButtonsMobile
-                        component={Paper}
-                        sx={{borderRadius: 0}}
-                    >
-                        {filterOptions.map(filterVal => {
-                            return (
-                                <Tab 
-                                    key={filterVal} 
-                                    label={filterVal} 
-                                    value={filterVal}
-                                    onClick={() => filter_players(filterVal)}
-                                />
-                            )
-                        })}
-                    </Tabs>
-                    <Divider />
-                </Box>
-                <TableContainer 
-                    sx={{ maxHeight: 'calc(65vh - 48px)', maxWidth: '100vw' }}
-                >
-                    <Table stickyHeader size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Rank</TableCell>
-                                <TableCell align="left">Name</TableCell>
-                                <TableCell align="left">Team</TableCell>
-                                <TableCell align="left">Position</TableCell>
-                                <TableCell align="left">Projections</TableCell>
-                                <TableCell align="left">2022 Points</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                        {filteredPlayers.map((row) => (
-                            <TableRow
-                                key={row.name}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
-                                hover
-                                onClick={() => setSelectedPlayer(row)}
-                            >
-                                <TableCell component="th" scope="row">
-                                    {row.overallRanking}
-                                </TableCell>
-                                <TableCell align="left">{row.name}</TableCell>
-                                <TableCell align="left">{row.team}</TableCell>
-                                <TableCell align="left">{row.position}</TableCell>
-                                <TableCell align="left">{helper.round(row.projections)}</TableCell>
-                                <TableCell align="left">{row.lastSeasonPoints}</TableCell>
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+            <Box 
+                width='100%'
+                maxWidth="100vw"
+                height={isWideScreen ? "65vh" : "calc(65vh - 48px)"}
+            >
+                <DataGrid
+                    rows={allPlayers.map((x, index) => {
+                        return { 
+                            id: x.overallRanking, name: x.name, position: x.position,  
+                            team: x.team, projections: helper.round(x.projections),
+                            lastSeasonPoints: x.lastSeasonPoints
+                        }
+                    })}
+                    columns={columns}
+                    onRowSelectionModelChange={(playerRank) => {
+                        setSelectedPlayer(allPlayers.find(x => x.overallRanking === playerRank[0]))
+                    }}
+                    disableColumnFilter
+                    disableColumnSelector
+                    disableDensitySelector
+                    slots={{ toolbar: GridToolbar }}
+                    slotProps={{
+                        toolbar: {
+                            showQuickFilter: true
+                        }
+                    }}
+                    initialState={{
+                        pagination: {
+                            paginationModel: { pageSize: 20 }
+                        }
+                    }}
+                    pageSizeOptions={[20]}
+                    density='compact'
+                    style={{
+                        borderRadius: 0
+                    }}
+                />
             </Box>
         )
     };
@@ -430,6 +425,8 @@ function Mock() {
         let player = computer.getPlayer(needs, currDrafter, round, allPlayers);
         let team = allTeams[currDrafter];
         teams.addPlayer(team, player);
+        setAllPlayers(allPlayers.filter(x => x.name !== player.name));
+        setFavorites(favorites.filter(x => x.name !== player.name));
         teams.updateNeeds(team, needs, player.position, round);
         var displayString = "Team " + currDrafter.toString() + " selects " + player.position + " " + player.name + ". ";
         if (simpleQueueArr[queueIndex + 1] !== queuePosition) {
@@ -441,6 +438,48 @@ function Mock() {
             var userDisplayString = "You selected " + player.position + " " + player.name + ". ";
             setDisplayInfo(userDisplayString);
         };
+    };
+
+    const handleUserDraft = () => {
+        let team = allTeams[queuePosition];
+        let needs = allNeeds[queuePosition];
+        let added = teams.addPlayer(team, selectedPlayer);
+        if (added) {
+            setAllPlayers(allPlayers.filter(x => x.name !== selectedPlayer.name));
+            setFavorites(favorites.filter(x => x.name !== selectedPlayer.name));
+            teams.updateNeeds(team, needs, selectedPlayer.position, round);
+            var displayString = "You selected " + selectedPlayer.position + " " + selectedPlayer.name + ". ";
+            setDisplayInfo(displayString);
+            setTimerNum(-1);
+        } else {
+            var tempInfo = displayInfo;
+            setDisplayInfo("Position already filled.");
+            setTimeout(() => {
+                setDisplayInfo(tempInfo);
+            }, 500);
+        };
+    };
+
+    // updates currDrafter, round, queue, timer
+    const nextDrafter = () => {
+        setCurrDrafter(simpleQueueArr[queueIndex + 1]);
+        setQueueIndex(queueIndex + 1);
+        if ((queueIndex + 1) !== simpleQueueArr.length) {
+            handleShiftQueue(currDrafter, round);
+            if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
+                setRound(round + 1);
+            }
+            if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
+                setTimerNum(computerTime);
+            } else {
+                audio.play();
+                setTimerNum(userTime);
+            }
+        } else { // draft end
+            setDraftEnd(true);
+            queueArr.shift();
+            queueArr.shift();
+        }
     };
 
     // TIMER
@@ -463,31 +502,14 @@ function Mock() {
                 if (currDrafter !== queuePosition) {
                     handleComputerDraft();
                 }
-                setCurrDrafter(simpleQueueArr[queueIndex + 1]);
-                setQueueIndex(queueIndex + 1);
-                if ((queueIndex + 1) !== simpleQueueArr.length) {
-                    handleShiftQueue(currDrafter, round);
-                    if (simpleQueueArr[queueIndex] === simpleQueueArr[queueIndex + 1]) {
-                        setRound(round + 1);
-                    }
-                    if ((simpleQueueArr[queueIndex + 1]) !== queuePosition) {
-                        setTimerNum(computerTime);
-                    } else {
-                        audio.play();
-                        setTimerNum(userTime);
-                    }
-                } else { // draft end
-                    setDraftEnd(true);
-                    queueArr.shift();
-                    queueArr.shift();
-                }
+                nextDrafter();
             }
         }
     });
 
     useEffect(() => {
-        
-    }, []);
+        setSelectedPlayer(allPlayers[0]);
+    }, [allPlayers]);
 
     return (
         <Container 

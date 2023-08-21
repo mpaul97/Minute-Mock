@@ -8,6 +8,7 @@ class Teams {
     constructor(leagueSize, positionSizes) {
         this.leagueSize = leagueSize;
         this.positionSizes = positionSizes;
+        this.flexPositions = ['RB', 'WR', 'TE'];
     };
     initTeams() {
         var teams = {};
@@ -38,21 +39,26 @@ class Teams {
         };
         return needs;
     };
+    insertPlayer(team, position, player) {
+        for (var i = 0; i < team[position].length; i++) {
+            if (team[position][i] === '') {
+                team[position][i] = player.name;
+                break;
+            }
+        }
+    };
     addPlayer(team, player) {
         if (team[player.position].includes('')) {
-            for (var i = 0; i < team[player.position].length; i++) {
-                team[player.position][i] = player.name;
-                break;
-            }
+            this.insertPlayer(team, player.position, player);
+        } else if (team['FLEX'].includes('') && this.flexPositions.includes(player.position)) {
+            this.insertPlayer(team, 'FLEX', player);
         } else if (team['BEN'].includes('')) {
-            for (var i = 0; i < team['BEN'].length; i++) {
-                team['BEN'][i] = player.name;
-                break;
-            }
+            this.insertPlayer(team, 'BEN', player);
         } else {
             alert('No space to add player.');
             return;
-        }
+        };
+        return true;
     };
     addKeepers(team, keepers, allPlayers) {
         keepers.map(x => {
@@ -107,7 +113,6 @@ class Teams {
                 }
             };
         };
-        console.log(needs)
         return needs;
     };
 }
