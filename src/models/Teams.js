@@ -55,7 +55,6 @@ class Teams {
         } else if (team['BEN'].includes('')) {
             this.insertPlayer(team, 'BEN', player);
         } else {
-            alert('No space to add player.');
             return;
         };
         return true;

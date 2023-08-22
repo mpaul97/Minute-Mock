@@ -113,17 +113,35 @@ function Mock() {
                                 width='100%'
                                 key={position + '_' + name + '_' + index}
                             >
-                                <Typography 
-                                    color='primary'
-                                    style={{
-                                        padding: 6,
-                                        paddingBottom: isWideScreen ? 8 : 5,
-                                        paddingTop: isWideScreen ? 8 : 6,
-                                        fontSize: '0.9rem'
-                                    }}
-                                >
-                                    {position}: {name}
-                                </Typography>
+                            <Box
+                                display="flex"
+                                flexDirection="row"
+                            >
+                                    <Typography 
+                                        color='primary'
+                                        fontWeight={600}
+                                        style={{
+                                            padding: 6,
+                                            paddingRight: 2,
+                                            paddingBottom: isWideScreen ? 8 : 5,
+                                            paddingTop: isWideScreen ? 8 : 6,
+                                            fontSize: '0.9rem'
+                                        }}
+                                    >
+                                        {position}: 
+                                    </Typography>
+                                    <Typography
+                                        color="secondary"
+                                        style={{
+                                            padding: 6,
+                                            paddingBottom: isWideScreen ? 8 : 5,
+                                            paddingTop: isWideScreen ? 8 : 6,
+                                            fontSize: '0.9rem'
+                                        }}
+                                    >
+                                        {name}
+                                    </Typography>
+                                </Box>
                                 <Divider />
                             </Box>
                         )
@@ -290,13 +308,20 @@ function Mock() {
                     onRowSelectionModelChange={(playerRank) => {
                         setSelectedPlayer(allPlayers.find(x => x.overallRanking === playerRank[0]))
                     }}
-                    disableColumnFilter
-                    disableColumnSelector
-                    disableDensitySelector
-                    slots={{ toolbar: GridToolbar }}
+                    // disableColumnFilter
+                    // disableColumnSelector
+                    // disableDensitySelector
+                    // slots={{ toolbar: GridToolbar }}
+                    // slotProps={{
+                    //     toolbar: {
+                    //         showQuickFilter: true
+                    //     }
+                    // }}
                     slotProps={{
-                        toolbar: {
-                            showQuickFilter: true
+                        filterPanel: {
+                            sx: {
+                                maxWidth: "100vw" 
+                            }
                         }
                     }}
                     initialState={{
@@ -411,13 +436,15 @@ function Mock() {
     };
 
     const handleShiftQueue = () => {
+        let currIndex = queueArr.findIndex(x => x.queueVal === currDrafter && x.round === round);
+        setQueueArr(queueArr.filter((x, index) => index !== currIndex));
         let temp = queueArr;
-        let index = temp.findIndex(x => x.queueVal === currDrafter && x.round === round);
-        temp.splice(index, 1);
-        if (temp[0].queueVal.toString().includes('Round')) {
+        if (currDrafter === simpleQueueArr[queueIndex + 1]) {
+            setRound(round + 1);
             temp.shift();
-        }
-        setQueueArr(temp);
+            temp.shift();
+            setQueueArr(temp);
+        };
     };
 
     const handleComputerDraft = () => {
@@ -459,6 +486,24 @@ function Mock() {
             }, 500);
         };
     };
+    
+    const handleAutoUserDraft = () => {
+        let team = allTeams[queuePosition];
+        let needs = allNeeds[queuePosition];
+        for (let player of favorites) {
+            let added = teams.addPlayer(team, player);
+            if (added) {
+                setAllPlayers(allPlayers.filter(x => x.name !== player.name));
+                setFavorites(favorites.filter(x => x.name !== player.name));
+                teams.updateNeeds(team, needs, player.position, round);
+                var displayString = "You auto-selected " + player.position + " " + player.name + ". ";
+                setDisplayInfo(displayString);
+                setTimerNum(-1);
+                return;
+            }
+        };
+        handleComputerDraft();
+    };
 
     // updates currDrafter, round, queue, timer
     const nextDrafter = () => {
@@ -495,7 +540,7 @@ function Mock() {
         };
     });
 
-    //MAIN GAME LOOP
+    // COMPUTER GAME LOOP
     useEffect(() => {
         if (startClicked && !draftEnd) {
             if (timerNum === -1) {
@@ -507,8 +552,23 @@ function Mock() {
         }
     });
 
+    // USER GAME LOOP
     useEffect(() => {
-        setSelectedPlayer(allPlayers[0]);
+        if (startClicked && !draftEnd) {
+            if (currDrafter === queuePosition && timerNum === 0) {
+                handleAutoUserDraft();
+                nextDrafter();
+            }
+        }
+    });
+
+    // UPDATE selectedPlayer
+    useEffect(() => {
+        console.log(`Round: ${round}`);
+        console.log(allNeeds)
+        if (!allPlayers.map(x => x.name).includes(selectedPlayer.name)) {
+            setSelectedPlayer(allPlayers[0]);
+        };
     }, [allPlayers]);
 
     return (
@@ -523,7 +583,12 @@ function Mock() {
                 minHeight="19.7vh"
             >
                 {/* Header */}
-                <Box component={Paper} flexGrow={1} style={styles.header}>
+                <Box 
+                    component={Paper} 
+                    flexGrow={1} 
+                    style={styles.header}
+                    minWidth="99.6vw"
+                >
                     <Typography 
                         variant="h4" 
                         fontWeight={700} 
