@@ -1,4 +1,3 @@
-import TeamObj from "./TeamObj";
 import Need from "./Need";
 import Helper from "./Helper";
 
@@ -59,12 +58,6 @@ class Teams {
         };
         return true;
     };
-    addKeepers(team, keepers, allPlayers) {
-        keepers.map(x => {
-            let player = allPlayers.find(y => x.name === y.name);
-            this.addPlayer(team, player);
-        })
-    };
     getMissingStarters(team) {
         return Object.keys(team).filter(key => key !== 'BEN').map(key => {
             return (
@@ -102,8 +95,8 @@ class Teams {
         if(!team['BEN'].includes('')) { // full bench
             // MAYBE NOT NEEDED
             // set last selected position weight to 0
-            // var i = needs.map(x => x.positionAbbr).indexOf(selectedPosition);
-            // needs[i] = new Need(selectedPosition, 0);
+            var lastIndex = needs.map(x => x.positionAbbr).indexOf(selectedPosition);
+            needs[lastIndex] = new Need(selectedPosition, 0);
             var missing = this.getMissingStarters(team);
             for (var [pos, count] of missing) {
                 if (count !== 0) {
@@ -113,6 +106,16 @@ class Teams {
             };
         };
         return needs;
+    };
+    initRoundsSelected(totalRounds, keepers) {
+        let obj = {};
+        for (var i = 1; i <= totalRounds; i++) {
+            obj[i] = [];
+            if (keepers.map(x => x.round).includes(i)) {
+                obj[i].push(keepers.find(x => x.round === i).name);
+            };
+        };
+        return obj;
     };
 }
 

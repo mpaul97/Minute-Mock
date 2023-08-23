@@ -2,29 +2,19 @@ import playersStd from '../assets/jsonData_std.json';
 import playersPpr from '../assets/jsonData_ppr.json';
 import playersHalf from '../assets/jsonData_half.json';
 import ding from '../assets/news-ting-6832.mp3';
-import { useDebugValue, useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AiFillHome, AiFillPlayCircle, AiFillStar, AiOutlineStar } from "react-icons/ai";
-import SearchIcon from '@mui/icons-material/Search';
 import { 
     Container, Paper, Grid, 
     Typography, Chip, Button, 
     IconButton, Divider, FormControl, 
-    InputLabel, Select, MenuItem,
-    Box, TableContainer, Table,
-    TableHead, TableRow, TableCell,
-    TableBody, useMediaQuery,
-    Tabs, Tab, TextField,
-    InputAdornment, InputBase, tableCellClasses,
-    BottomNavigation
+    Select, MenuItem, Box, 
+    useMediaQuery, Tabs, Tab
 } from "@mui/material";
 import { TabPanel, TabContext } from '@mui/lab';
-import { 
-    DataGrid, GridColDef, GridValueGetterParams,
-    GridToolbarContainer, GridToolbarFilterButton, GridToolbar
-} from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import Helper from '../models/Helper';
-import TeamObj from '../models/TeamObj';
 import Teams from "../models/Teams";
 import Computer from "../models/Computer";
 
@@ -92,23 +82,24 @@ function Mock() {
     const [allTeams, setAllTeams] = useState(teams.initTeams());
     const [displayedTeam, setDisplayedTeam] = useState(queuePosition);
 
+    const [roundsSelected, setRoundsSelected] = useState(teams.initRoundsSelected(totalPositionSize, keepers));
+
     const renderTeam = () => {
         return (
             <Box 
-                style={styles.teamPlayerPaper}
                 display="flex"
                 flexDirection="column"
-                minHeight="80.2vh"
+                height={isWideScreen ? "80.2vh" : "calc(80vh - 60px)"}
                 sx={{
-                    pb: isWideScreen ? 0 : '48px',
-                    pt: '2px'
+                    overflow: isWideScreen ? 'auto' : 'hidden',
+                    overflowX: 'hidden',
+                    pb: isWideScreen ? 0 : 90,
                 }}
             >
                 {Object.keys(allTeams[displayedTeam]).map((position) => {
                     return ((allTeams[displayedTeam][position]).map((name, index) => {
                         return (
                             <Box 
-                                style={styles.teamPlayerContainer}
                                 flexGrow={1}
                                 width='100%'
                                 key={position + '_' + name + '_' + index}
@@ -116,28 +107,23 @@ function Mock() {
                             <Box
                                 display="flex"
                                 flexDirection="row"
+                                sx={{
+                                    p: 1
+                                }}
                             >
                                     <Typography 
                                         color='primary'
                                         fontWeight={600}
-                                        style={{
-                                            padding: 6,
-                                            paddingRight: 2,
-                                            paddingBottom: isWideScreen ? 8 : 5,
-                                            paddingTop: isWideScreen ? 8 : 6,
-                                            fontSize: '0.9rem'
+                                        fontSize="0.9rem"
+                                        sx={{
+                                            pr: 1
                                         }}
                                     >
                                         {position}: 
                                     </Typography>
                                     <Typography
                                         color="secondary"
-                                        style={{
-                                            padding: 6,
-                                            paddingBottom: isWideScreen ? 8 : 5,
-                                            paddingTop: isWideScreen ? 8 : 6,
-                                            fontSize: '0.9rem'
-                                        }}
+                                        fontSize="0.9rem"
                                     >
                                         {name}
                                     </Typography>
@@ -150,11 +136,12 @@ function Mock() {
                 }
                 <Box flexGrow={1} width='100%'>
                     <FormControl
-                        sx={{width: '100%', zIndex: 0}}
+                        sx={{width: '100%', zIndex: 0}} 
                     >
                         <Select
                             value={displayedTeam}
                             displayEmpty
+                            disableUnderline
                             variant="standard"
                             sx={{
                                 padding: 1,
@@ -294,7 +281,7 @@ function Mock() {
             <Box 
                 width='100%'
                 maxWidth="100vw"
-                height={isWideScreen ? "65vh" : "calc(65vh - 48px)"}
+                height={isWideScreen ? "65vh" : "calc(65vh - 65px)"}
             >
                 <DataGrid
                     rows={allPlayers.map((x, index) => {
@@ -349,15 +336,15 @@ function Mock() {
                 display="flex"
                 flexDirection="column"
                 minWidth={isWideScreen ? "100%" : "100vw"}
-                minHeight={isWideScreen ? "80.2vh" : "65vh"}
+                height={isWideScreen ? "80vh" : "65vh"}
+                overflow="auto"
                 sx={{
-                    pb: isWideScreen ? 0 : '47px'
+                    pb: isWideScreen ? 0 : 6
                 }}
             >
                 <Typography 
                     variant="h6" 
                     color="secondary"
-                    position="fixed"
                     sx={{
                         p: 1,
                         pl: 2.25,
@@ -373,9 +360,7 @@ function Mock() {
                 <Box 
                     display="flex"
                     flexDirection="column"
-                    overflow="auto"
-                    maxHeight={isWideScreen ? "calc(80vh - 48px)" : "calc(60vh - 48px)"}
-                    sx={{mt: '48px', overflowX: 'hidden'}}
+                    flexGrow={1}
                 >
                     {favorites.map(player => {
                         return (
@@ -413,7 +398,6 @@ function Mock() {
     };
 
     // DRAFT LOGIC
-    teams.addKeepers(allTeams[queuePosition], keepers, allPlayers);
     const [allNeeds, setAllNeeds] = useState(teams.initNeeds());
 
     const [startClicked, setStartClicked] = useState(false);
@@ -427,6 +411,20 @@ function Mock() {
     const [queueIndex, setQueueIndex] = useState(0);
 
     // GAME FUNCTIONS
+    const handleKeepers = () => {
+        let team = allTeams[queuePosition];
+        let needs = allNeeds[queuePosition];
+        for (let k of keepers) {
+            if (allPlayers.map(x => x.name).includes(k.name)) {
+                let player = allPlayers.find(x => x.name === k.name);
+                teams.addPlayer(team, player);
+                setAllPlayers(allPlayers.filter(x => x.name !== player.name));
+                setFavorites(favorites.filter(x => x.name !== player.name));
+                teams.updateNeeds(team, needs, player.position, round);
+            };
+        }
+    };
+
     const handleStart = () => {
         setStartClicked(true);
         setDisplayInfo("Draft started.");
@@ -527,6 +525,11 @@ function Mock() {
         }
     };
 
+    // ONLOAD - add keepers
+    useEffect(() => {
+        handleKeepers();
+    }, [])
+
     // TIMER
     useEffect(() => {
         let timer = null;
@@ -555,17 +558,34 @@ function Mock() {
     // USER GAME LOOP
     useEffect(() => {
         if (startClicked && !draftEnd) {
-            if (currDrafter === queuePosition && timerNum === 0) {
-                handleAutoUserDraft();
-                nextDrafter();
+            // if (currDrafter === queuePosition && keepers.map(x => x.round).includes(round)) {
+            //     if (currDrafter === queuePosition && timerNum === 0) {
+            //         handleAutoUserDraft();
+            //         nextDrafter();
+            //     }
+            // }
+            if (currDrafter === queuePosition) {
+                if (!keepers.map(x => x.round).includes(round)) {
+                    let k = keepers.find(x => x.round === round);
+                    setTimeout(() => {
+                        setDisplayInfo(`Keeper selected: ${k.name}.`);
+                    }, 500);
+                    nextDrafter();
+                };
+                if (timerNum === 0) {
+                    handleAutoUserDraft();
+                    nextDrafter();
+                }
             }
         }
     });
 
     // UPDATE selectedPlayer
     useEffect(() => {
-        console.log(`Round: ${round}`);
-        console.log(allNeeds)
+        // if (round > 10) {
+        //     console.log(`Round: ${round}`);
+        //     console.log(allNeeds)
+        // }
         if (!allPlayers.map(x => x.name).includes(selectedPlayer.name)) {
             setSelectedPlayer(allPlayers[0]);
         };
@@ -587,7 +607,7 @@ function Mock() {
                     component={Paper} 
                     flexGrow={1} 
                     style={styles.header}
-                    minWidth="99.6vw"
+                    minWidth="99vw"
                 >
                     <Typography 
                         variant="h4" 
