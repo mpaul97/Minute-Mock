@@ -17,6 +17,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import Helper from '../models/Helper';
 import Teams from "../models/Teams";
 import Computer from "../models/Computer";
+import PlayerRound from '../models/PlayerRound';
 
 const helper = new Helper();
 const computer = new Computer();
@@ -82,7 +83,11 @@ function Mock() {
     const [allTeams, setAllTeams] = useState(teams.initTeams());
     const [displayedTeam, setDisplayedTeam] = useState(queuePosition);
 
-    const [roundsSelected, setRoundsSelected] = useState(teams.initRoundsSelected(totalPositionSize, keepers));
+    const [roundsSelected, setRoundsSelected] = useState(keepers);
+
+    const getPlayerRound = (name) => {
+        return roundsSelected.find(x => x.name === name).round;
+    };
 
     const renderTeam = () => {
         return (
@@ -107,26 +112,43 @@ function Mock() {
                             <Box
                                 display="flex"
                                 flexDirection="row"
+                                justifyContent="space-between"
                                 sx={{
                                     p: 1
                                 }}
                             >
-                                    <Typography 
-                                        color='primary'
-                                        fontWeight={600}
-                                        fontSize="0.9rem"
-                                        sx={{
-                                            pr: 1
-                                        }}
+                                    <Box
+                                        display="flex"
+                                        flexDirection="row"
                                     >
-                                        {position}: 
-                                    </Typography>
-                                    <Typography
-                                        color="secondary"
-                                        fontSize="0.9rem"
-                                    >
-                                        {name}
-                                    </Typography>
+                                        <Typography 
+                                            color='primary'
+                                            fontWeight={600}
+                                            fontSize="0.9rem"
+                                            sx={{
+                                                pr: 1
+                                            }}
+                                        >
+                                            {position}: 
+                                        </Typography>
+                                        <Typography
+                                            color="secondary"
+                                            fontSize="0.9rem"
+                                        >
+                                            {name}
+                                        </Typography>
+                                    </Box>
+                                    {name.length != 0 ?
+                                        <Typography
+                                            fontSize="0.9rem"
+                                            fontStyle="italic"
+                                            sx={{opacity: 0.6}}
+                                        >
+                                            R{getPlayerRound(name)}
+                                        </Typography>
+                                        : 
+                                        ''
+                                    }
                                 </Box>
                                 <Divider />
                             </Box>
@@ -450,6 +472,7 @@ function Mock() {
         let player = computer.getPlayer(needs, currDrafter, round, allPlayers);
         let team = allTeams[currDrafter];
         teams.addPlayer(team, player);
+        setRoundsSelected([...roundsSelected, new PlayerRound(player.name, round)]);
         setAllPlayers(allPlayers.filter(x => x.name !== player.name));
         setFavorites(favorites.filter(x => x.name !== player.name));
         teams.updateNeeds(team, needs, player.position, round);
@@ -470,6 +493,7 @@ function Mock() {
         let needs = allNeeds[queuePosition];
         let added = teams.addPlayer(team, selectedPlayer);
         if (added) {
+            setRoundsSelected([...roundsSelected, new PlayerRound(selectedPlayer.name, round)]);
             setAllPlayers(allPlayers.filter(x => x.name !== selectedPlayer.name));
             setFavorites(favorites.filter(x => x.name !== selectedPlayer.name));
             teams.updateNeeds(team, needs, selectedPlayer.position, round);
@@ -491,6 +515,7 @@ function Mock() {
         for (let player of favorites) {
             let added = teams.addPlayer(team, player);
             if (added) {
+                setRoundsSelected([...roundsSelected, new PlayerRound(player.name, round)]);
                 setAllPlayers(allPlayers.filter(x => x.name !== player.name));
                 setFavorites(favorites.filter(x => x.name !== player.name));
                 teams.updateNeeds(team, needs, player.position, round);
@@ -533,7 +558,7 @@ function Mock() {
     // TIMER
     useEffect(() => {
         let timer = null;
-        if (startClicked) {
+        if (startClicked && !draftEnd) {
             timer = setInterval(() => {
                 setTimerNum(timerNum - 1);
             }, 1000);
@@ -558,18 +583,10 @@ function Mock() {
     // USER GAME LOOP
     useEffect(() => {
         if (startClicked && !draftEnd) {
-            // if (currDrafter === queuePosition && keepers.map(x => x.round).includes(round)) {
-            //     if (currDrafter === queuePosition && timerNum === 0) {
-            //         handleAutoUserDraft();
-            //         nextDrafter();
-            //     }
-            // }
             if (currDrafter === queuePosition) {
-                if (!keepers.map(x => x.round).includes(round)) {
+                if (keepers.map(x => x.round).includes(round)) {
                     let k = keepers.find(x => x.round === round);
-                    setTimeout(() => {
-                        setDisplayInfo(`Keeper selected: ${k.name}.`);
-                    }, 500);
+                    setDisplayInfo(`Keeper selected: ${k.name}.`);
                     nextDrafter();
                 };
                 if (timerNum === 0) {
@@ -577,6 +594,10 @@ function Mock() {
                     nextDrafter();
                 }
             }
+        };
+        if (draftEnd) {
+            setDisplayInfo("Draft finished.");
+            setTimerNum(-1);
         }
     });
 
@@ -597,7 +618,7 @@ function Mock() {
             style={styles.mainContainer}
         >
             <Box
-                maxWidth="100%"
+                width="100%"
                 display="flex"
                 flexDirection="column"
                 minHeight="19.7vh"
@@ -607,7 +628,6 @@ function Mock() {
                     component={Paper} 
                     flexGrow={1} 
                     style={styles.header}
-                    minWidth="99vw"
                 >
                     <Typography 
                         variant="h4" 
@@ -624,7 +644,11 @@ function Mock() {
                                 <AiFillHome size={22}/>
                             </IconButton>
                         </Link>
-                        <IconButton onClick={handleStart} color='primary'>
+                        <IconButton 
+                            onClick={handleStart} 
+                            color='primary'
+                            disable={draftEnd}
+                        >
                             <AiFillPlayCircle size={22}/>
                         </IconButton>
                         <Chip 

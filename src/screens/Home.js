@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Helper from '../models/Helper';
-import Keeper from '../models/Keeper';
+import PlayerRound from '../models/PlayerRound';
 
 const sizes = [8, 10, 12, 14];
 const types = ['Standard', 'PPR', 'Half-PPR'];
@@ -78,7 +78,13 @@ function Home() {
             <Container
                 style={styles.optionsContainer}
             >
-                <Typography variant='h6' fontWeight={600} color="secondary">{title}</Typography>
+                <Typography 
+                    variant='h6' 
+                    fontWeight={600} 
+                    color="secondary"
+                >
+                    {title}
+                </Typography>
                 <Container
                     style={styles.innerOptionsContainer}
                 >
@@ -148,8 +154,12 @@ function Home() {
                     width="100%"
                     p={2}
                     component={Paper}
+                    borderRadius={0}
                 >
-                    <Typography variant='h4' fontSize='1.7rem' fontWeight={700} color="primary">Minute Mock</Typography>
+                    <Box>
+                        <Typography variant='h4' fontSize='1.7rem' fontWeight={700} color="primary">Minute Mock</Typography>
+                        <Typography variant='p' fontSize='0.8rem' color="secondary">Fantasy Football Draft Simulator</Typography>
+                    </Box>  
                     <IconButton color='primary' onClick={() => setInfoModalIsOpen(true)}>
                         <AiFillInfoCircle size={20}/>
                     </IconButton>
@@ -185,11 +195,8 @@ function Home() {
                 {/* End Info Modal */}
                 {/* Main Options */}
                 {renderOption('League Size', sizes, size, setSizeAndQueue)}
-                <Divider flexItem/>
                 {renderOption('Draft Position', Array.from({length: size}, (_, i) => i + 1), queue, setQueue)}
-                <Divider flexItem/>
                 {renderOption('League Type', types, type, setTypeAndPlayers)}
-                <Divider flexItem/>
                 {/* End Main Options */}
                 {/* Render player (select sizes for each position) */}
                 <Container
@@ -222,10 +229,8 @@ function Home() {
                         })}
                     </Container>
                 </Container>
-                <Divider flexItem/>
                 {/* End Render Players */}
                 {renderOption('Clock Speed', times, clock, setClock)}
-                <Divider flexItem/>
                 {/* Keepers */}
                 <Container
                     style={styles.optionsContainer}
@@ -307,7 +312,7 @@ function Home() {
                                     onClick={() => {
                                         if (keeperSearchValue) {
                                             if (keepers.filter(x => x.name === keeperSearchValue).length === 0) {
-                                                setKeepers([...keepers, new Keeper(keeperSearchValue, keeperRound)])
+                                                setKeepers([...keepers, new PlayerRound(keeperSearchValue, keeperRound)])
                                                 setKeeperAddClicked(false);
                                             } else {
                                                 setKeeperErrorMessage('Player already added.')
@@ -343,7 +348,6 @@ function Home() {
                     </Paper>
                 </Modal>
                 {/* End Keepers Modal */}
-                <Divider flexItem/>
                 {/* Submit to Mock */}
                 <Link
                     to='/mock/content'

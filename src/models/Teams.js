@@ -29,10 +29,10 @@ class Teams {
         for (var i = 1; i < this.leagueSize + 1; i++) { 
             needs[i] = [
                 new Need('QB', helper.randomFloatInRange(0.1, 0.3)),
-                new Need('RB', helper.randomFloatInRange(0.3, 0.6)),
+                new Need('RB', helper.randomFloatInRange(0.24, 0.57)),
                 new Need('WR', helper.randomFloatInRange(0.2, 0.5)),
                 new Need('TE', helper.randomFloatInRange(0.1, 0.25)),
-                new Need('K', helper.randomFloatInRange(0, 0.12)),
+                new Need('K', helper.randomFloatInRange(0.02, 0.12)),
                 new Need('DST', helper.randomFloatInRange(0.02, 0.15))
             ]
         };
@@ -106,16 +106,6 @@ class Teams {
             };
         };
         return needs;
-    };
-    initRoundsSelected(totalRounds, keepers) {
-        let obj = {};
-        for (var i = 1; i <= totalRounds; i++) {
-            obj[i] = [];
-            if (keepers.map(x => x.round).includes(i)) {
-                obj[i].push(keepers.find(x => x.round === i).name);
-            };
-        };
-        return obj;
     };
 }
 
