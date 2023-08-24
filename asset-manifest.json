@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/Minute-Mock/static/css/main.62c797a6.css",
-    "main.js": "/Minute-Mock/static/js/main.27ab26bf.js",
+    "main.js": "/Minute-Mock/static/js/main.96799c40.js",
     "static/js/787.1e9412c0.chunk.js": "/Minute-Mock/static/js/787.1e9412c0.chunk.js",
     "static/media/news-ting-6832.mp3": "/Minute-Mock/static/media/news-ting-6832.a08f242f982c5fd391e8.mp3",
     "index.html": "/Minute-Mock/index.html",
     "main.62c797a6.css.map": "/Minute-Mock/static/css/main.62c797a6.css.map",
-    "main.27ab26bf.js.map": "/Minute-Mock/static/js/main.27ab26bf.js.map",
+    "main.96799c40.js.map": "/Minute-Mock/static/js/main.96799c40.js.map",
     "787.1e9412c0.chunk.js.map": "/Minute-Mock/static/js/787.1e9412c0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.62c797a6.css",
-    "static/js/main.27ab26bf.js"
+    "static/js/main.96799c40.js"
   ]
 }
