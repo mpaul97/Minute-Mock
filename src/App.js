@@ -1,7 +1,7 @@
 import Home from "./screens/Home";
 import Mock from "./screens/Mock";
 import Testing from "./screens/Testing";
-import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Link, HashRouter } from "react-router-dom";
 import { createTheme, ThemeProvider, Container, CssBaseline } from "@mui/material";
 import { blue, deepOrange, amber } from "@mui/material/colors";
 
@@ -17,12 +17,12 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route path="/content" element={<Mock />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
       {/* <Testing /> */}
     </ThemeProvider>
   )
