@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/mock/home/static/css/main.62c797a6.css",
-    "main.js": "/mock/home/static/js/main.7237ef7c.js",
-    "static/js/787.1e9412c0.chunk.js": "/mock/home/static/js/787.1e9412c0.chunk.js",
-    "static/media/news-ting-6832.mp3": "/mock/home/static/media/news-ting-6832.a08f242f982c5fd391e8.mp3",
-    "index.html": "/mock/home/index.html",
-    "main.62c797a6.css.map": "/mock/home/static/css/main.62c797a6.css.map",
-    "main.7237ef7c.js.map": "/mock/home/static/js/main.7237ef7c.js.map",
-    "787.1e9412c0.chunk.js.map": "/mock/home/static/js/787.1e9412c0.chunk.js.map"
+    "main.css": "/Minute-Mock/static/css/main.62c797a6.css",
+    "main.js": "/Minute-Mock/static/js/main.27ab26bf.js",
+    "static/js/787.1e9412c0.chunk.js": "/Minute-Mock/static/js/787.1e9412c0.chunk.js",
+    "static/media/news-ting-6832.mp3": "/Minute-Mock/static/media/news-ting-6832.a08f242f982c5fd391e8.mp3",
+    "index.html": "/Minute-Mock/index.html",
+    "main.62c797a6.css.map": "/Minute-Mock/static/css/main.62c797a6.css.map",
+    "main.27ab26bf.js.map": "/Minute-Mock/static/js/main.27ab26bf.js.map",
+    "787.1e9412c0.chunk.js.map": "/Minute-Mock/static/js/787.1e9412c0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.62c797a6.css",
-    "static/js/main.7237ef7c.js"
+    "static/js/main.27ab26bf.js"
   ]
 }
