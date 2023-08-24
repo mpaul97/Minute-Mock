@@ -639,7 +639,7 @@ function Mock() {
                         Minute Mock
                     </Typography>
                     <Container style={styles.headerOptions}>
-                        <Link to="/mock/home/">
+                        <Link to="/">
                             <IconButton color='primary'>
                                 <AiFillHome size={22}/>
                             </IconButton>

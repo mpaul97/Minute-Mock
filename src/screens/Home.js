@@ -350,7 +350,7 @@ function Home() {
                 {/* End Keepers Modal */}
                 {/* Submit to Mock */}
                 <Link
-                    to='/mock/content'
+                    to='/content'
                     state={{
                         leagueSize: size,
                         queuePosition: queue,

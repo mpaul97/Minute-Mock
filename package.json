@@ -2,7 +2,7 @@
   "name": "mock",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://localhost:3000/mock/home",
+  "homepage": "https://mpaul97.github.io/Minute-Mock/",
   "dependencies": {
     "-": "0.0.1",
     "@emotion/react": "^11.11.1",

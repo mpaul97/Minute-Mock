@@ -19,8 +19,8 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route exact path="/mock/home" element={<Home />} />
-          <Route path="/mock/content" element={<Mock />} />
+          <Route exact path="/" element={<Home />} />
+          <Route path="/content" element={<Mock />} />
         </Routes>
       </BrowserRouter>
       {/* <Testing /> */}
